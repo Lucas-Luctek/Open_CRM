@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Fiche prospect - {{ prospect.etablissement }}</title>
+<style>
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11pt; color: #0f172a; margin: 0; padding: 20px; }
+h1 { font-size: 18pt; font-weight: 700; margin: 0 0 4px; }
+h2 { font-size: 9pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+.header { border-bottom: 2px solid #1e40af; padding-bottom: 16px; margin-bottom: 20px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 8pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.badge-green { background: #dcfce7; color: #16a34a; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.grid { display: table; width: 100%; }
+.col { display: table-cell; width: 50%; vertical-align: top; padding-right: 20px; }
+.col:last-child { padding-right: 0; }
+label { font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; margin-top: 12px; }
+.val { font-size: 10pt; }
+table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-top: 8px; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+th { font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 7.5pt; letter-spacing: 0.4px; background: #f8fafc; }
+.intervention { background: #f8fafc; border-left: 3px solid #1e40af; padding: 10px 12px; margin-bottom: 8px; page-break-inside: avoid; }
+.intervention-title { font-weight: 700; color: #1e40af; font-size: 9.5pt; margin-bottom: 4px; }
+.intervention-body { font-size: 9pt; white-space: pre-wrap; line-height: 1.5; }
+.progress-badges { margin-top: 10px; }
+.footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 8pt; color: #94a3b8; text-align: right; }
+</style></head>
+<body>
+<div class="header">
+    <h1>{{ prospect.etablissement }}</h1>
+    <span class="badge badge-gray">{{ prospect.categorie or '' }}</span>
+    <span class="badge {% if prospect.statut == 'Client !' %}badge-green{% else %}badge-blue{% endif %}" style="margin-left:6px;">{{ prospect.statut or '' }}</span>
+    {% if prospect.no_contact %}<span class="badge" style="background:#fee2e2; color:#dc2626; margin-left:6px;">⊘ Opt-out</span>{% endif %}
+</div>
+
+<div class="grid">
+    <div class="col">
+        <label>Contact</label><div class="val">{{ prospect.contact or '—' }}</div>
+        <label>Téléphone</label><div class="val">{{ prospect.telephone or '—' }}</div>
+        <label>Email</label><div class="val">{{ prospect.email or '—' }}</div>
+        <label>Adresse</label><div class="val">{{ (prospect.adresse or '') ~ (', ' ~ prospect.code_postal if prospect.code_postal else '') ~ (' ' ~ prospect.ville if prospect.ville else '') or '—' }}</div>
+    </div>
+    <div class="col">
+        <label>Qualification</label><div class="val">{{ prospect.temperature or '—' }}</div>
+        <label>Prochaine relance</label><div class="val">{{ prospect.date_relance or 'Non planifiée' }}</div>
+        <label>Ajouté le</label><div class="val">{{ prospect.date_ajout[:10] if prospect.date_ajout else '—' }}</div>
+        {% if prospect.source %}<label>Source</label><div class="val">{{ prospect.source }}</div>{% endif %}
+    </div>
+</div>
+
+<div class="progress-badges">
+    <label>Progression</label>
+    <span class="badge {% if prospect.catalogue %}badge-green{% else %}badge-gray{% endif %}">Catalogue</span>
+    <span class="badge {% if prospect.grille %}badge-green{% else %}badge-gray{% endif %}" style="margin-left:4px;">Grille</span>
+    <span class="badge {% if prospect.devis %}badge-green{% else %}badge-gray{% endif %}" style="margin-left:4px;">Devis</span>
+</div>
+
+{% if prospect.commentaire %}
+<h2>Notes</h2>
+<div style="font-size:9.5pt; white-space:pre-wrap; line-height:1.5;">{{ prospect.commentaire }}</div>
+{% endif %}
+
+{% if interventions %}
+<h2>Historique des activités ({{ interventions|length }})</h2>
+{% for i in interventions %}
+<div class="intervention">
+    <div class="intervention-title">{{ i.date_intervention }} — {{ i.type_contact }}{% if i.username %} <span style="font-weight:400; color:#64748b;">({{ i.username }})</span>{% endif %}</div>
+    <div class="intervention-body">{{ i.compte_rendu }}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if historique_statut %}
+<h2>Historique des statuts</h2>
+<table>
+    <thead><tr><th>Date</th><th>Ancien statut</th><th>Nouveau statut</th><th>Par</th></tr></thead>
+    <tbody>
+    {% for h in historique_statut %}
+    <tr>
+        <td>{{ h.horodatage[:16] }}</td>
+        <td>{{ h.ancien_statut or '—' }}</td>
+        <td>{{ h.nouveau_statut }}</td>
+        <td>{{ h.username or '—' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="footer">Exporté le {{ now if now else '' }} — CRM</div>
+</body></html>

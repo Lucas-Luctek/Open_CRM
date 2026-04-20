@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Stats commerciaux - {{ company_name }}</title><style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+.container { max-width: 1100px; margin: 32px auto; background: var(--card); padding: 32px; border-radius: 8px; border: 1px solid var(--border); }
+h1 { margin-top:0; font-size:1.4rem; border-bottom:1px solid var(--border); padding-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+th, td { padding:14px 18px; text-align:left; border-bottom:1px solid var(--border); }
+th { font-weight:600; color:var(--text-muted); text-transform:uppercase; font-size:0.78rem; letter-spacing:0.5px; background:var(--bg); }
+.stat-num { font-size:1.4rem; font-weight:700; color:var(--primary); }
+.badge { display:inline-block; padding:3px 8px; border-radius:4px; font-size:0.78rem; font-weight:600; }
+.badge-admin { background:rgba(212,175,55,0.12); color:var(--accent); border:1px solid rgba(212,175,55,0.3); }
+.badge-commercial { background:rgba(30,64,175,0.08); color:var(--primary); border:1px solid rgba(30,64,175,0.2); }
+.btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); padding:7px 14px; border-radius:6px; text-decoration:none; font-size:0.88rem; }
+.btn-outline:hover { background:var(--bg); }
+</style></head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">{% include '_navbar.html' %}
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h1 style="margin:0; border:none; padding:0;">Statistiques par commercial</h1>
+        <a href="/admin?tab=users" class="btn-outline">← Admin</a>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:20px;">Activités enregistrées dans le CRM par utilisateur.</p>
+
+    {% if not stats %}
+    <p style="color:var(--text-muted); font-style:italic;">Aucune donnée disponible.</p>
+    {% else %}
+    <table>
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Interventions</th>
+                <th>Actions statut</th>
+                <th>Emails envoyés</th>
+                <th>Conversions clients</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for s in stats %}
+        <tr>
+            <td><strong>{{ s.username }}</strong></td>
+            <td><span class="badge badge-{{ s.role }}">{{ s.role }}</span></td>
+            <td><span class="stat-num" style="font-size:1.1rem;">{{ s.nb_interventions }}</span></td>
+            <td>{{ s.nb_actions }}</td>
+            <td>{{ s.nb_emails }}</td>
+            <td>
+                {% if s.nb_conversions > 0 %}
+                <span style="color:var(--success); font-weight:700;">{{ s.nb_conversions }}</span>
+                {% else %}
+                <span style="color:var(--text-muted);">0</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+</body></html>

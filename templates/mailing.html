@@ -1,0 +1,417 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Mailing - {{ company_name }}</title>
+<style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+
+
+
+
+
+
+
+.container { max-width: 1400px; margin: 28px auto; padding: 0 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 4px 0; }
+h2 { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 12px 0; }
+label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px; }
+input[type=text], input[type=email], select { padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--text); outline: none; box-sizing: border-box; width: 100%; }
+input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+.btn { background-color: var(--primary); color: #fff; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; padding: 9px 16px; border-radius: 6px; transition: 0.2s; text-decoration: none; display: inline-block; font-family: inherit; white-space: nowrap; }
+.btn:hover { background-color: var(--primary-hover); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.btn-success { background: var(--success); }
+.btn-success:hover { background: #15803d; }
+.btn-accent { background: var(--accent); color: #000; }
+.btn-accent:hover { background: #b8962e; }
+.btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+/* Variables */
+.var-btn { display: inline-block; padding: 3px 8px; margin: 3px 2px; background: rgba(30,64,175,0.08); border: 1px solid rgba(30,64,175,0.2); border-radius: 4px; font-size: 0.8rem; font-family: monospace; color: var(--primary); cursor: pointer; transition: 0.15s; }
+.var-btn:hover { background: rgba(30,64,175,0.15); }
+/* Éditeur */
+#bodyEditor { width: 100%; min-height: 280px; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--text); box-sizing: border-box; resize: vertical; outline: none; }
+#bodyEditor:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+/* Liste prospects */
+.p-item { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; }
+.p-item:last-child { border-bottom: none; }
+.p-item:hover { background: rgba(30,64,175,0.04); }
+.p-item input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
+.p-item input[type=radio] { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
+.p-name { flex: 1; font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-email { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.no-email { font-size: 0.78rem; color: var(--danger); opacity: 0.7; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.73rem; font-weight: 600; white-space: nowrap; }
+.badge-cat { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+.counter { background: var(--accent); color: #000; font-weight: 700; font-size: 0.8rem; padding: 2px 8px; border-radius: 12px; }
+.layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; }
+/* Modal prévisualisation */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border-radius: 8px; padding: 28px; width: 100%; max-width: 680px; max-height: 85vh; overflow-y: auto; border: 1px solid var(--border); }
+.modal h3 { margin: 0 0 6px; font-size: 1rem; }
+.preview-subject { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; font-weight: 600; font-size: 0.95rem; }
+.preview-body { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 16px; min-height: 200px; color: #0f172a; }
+/* Résultat envoi */
+.send-result { padding: 14px 16px; border-radius: 6px; margin-top: 16px; font-size: 0.9rem; display: none; }
+.send-result.success { background: rgba(22,163,74,0.1); color: var(--success); border: 1px solid rgba(22,163,74,0.3); }
+.send-result.error { background: rgba(220,38,38,0.1); color: var(--danger); border: 1px solid rgba(220,38,38,0.3); }
+@media (max-width: 950px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">
+{% include '_navbar.html' %}
+
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h1>Mailing</h1>
+            <p style="margin:0; color:var(--text-muted); font-size:0.9rem;">Envoi personnalisé à un ou plusieurs prospects — publipostage automatique.</p>
+        </div>
+        {% if not smtp_ok %}
+        <div style="background:rgba(220,38,38,0.1); color:var(--danger); border:1px solid rgba(220,38,38,0.3); padding:10px 14px; border-radius:6px; font-size:0.88rem;">
+            SMTP non configuré — <a href="/admin" style="color:var(--danger); font-weight:600;">Configurer dans Admin</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="layout">
+
+        <!-- COLONNE GAUCHE : Éditeur -->
+        <div>
+            <!-- Objet -->
+            <div class="card">
+                <h2>Objet de l'email</h2>
+                <input type="text" id="subject" placeholder="Ex : Nouveautés {{company}} — spécial {{categorie}}" style="margin-bottom:10px;">
+                <div>
+                    <span style="font-size:0.78rem; color:var(--text-muted); margin-right:6px;">Variables :</span>
+                    <span class="var-btn" onclick="insertVar('subject','{{etablissement}}')">{{etablissement}}</span>
+                    <span class="var-btn" onclick="insertVar('subject','{{contact}}')">{{contact}}</span>
+                    <span class="var-btn" onclick="insertVar('subject','{{categorie}}')">{{categorie}}</span>
+                    <span class="var-btn" onclick="insertVar('subject','{{company}}')">{{company}}</span>
+                </div>
+            </div>
+
+            <!-- Corps -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h2 style="margin:0;">Corps du message</h2>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-sm btn-outline" onclick="setMode('text')" id="modeText">Texte</button>
+                        <button class="btn btn-sm btn-outline" onclick="setMode('html')" id="modeHtml">HTML</button>
+                    </div>
+                </div>
+
+                <!-- Variables publipostage -->
+                <div style="background:rgba(30,64,175,0.04); border:1px solid rgba(30,64,175,0.15); border-radius:6px; padding:10px; margin-bottom:12px;">
+                    <p style="margin:0 0 4px; font-size:0.75rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;">Prospect</p>
+                    <span class="var-btn" onclick="insertVar('body','{{etablissement}}')">{{etablissement}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{contact}}')">{{contact}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{telephone}}')">{{telephone}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{email}}')">{{email}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{ville}}')">{{ville}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{categorie}}')">{{categorie}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{statut}}')">{{statut}}</span>
+                    <p style="margin:6px 0 4px; font-size:0.75rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;">Votre entreprise</p>
+                    <span class="var-btn" onclick="insertVar('body','{{company}}')">{{company}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{company_adresse}}')">{{company_adresse}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{company_tel}}')">{{company_tel}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{company_email}}')">{{company_email}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{company_site}}')">{{company_site}}</span>
+                    <span class="var-btn" onclick="insertVar('body','{{company_siret}}')">{{company_siret}}</span>
+                </div>
+
+                <textarea id="bodyEditor" placeholder="Bonjour {{contact}},&#10;&#10;Je me permets de vous contacter au nom de {{company}}...&#10;&#10;Cordialement"></textarea>
+
+                <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+                    <button class="btn btn-accent btn-sm" onclick="openPreview()">Prévisualiser</button>
+                    <select id="tplSelect" onchange="loadTplFromSelect()" style="flex:1; min-width:160px; padding:7px 10px; font-size:0.85rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text);">
+                        <option value="">— Charger un modèle —</option>
+                        {% for tpl in mail_templates %}
+                        <option value="{{ tpl.id }}" data-sujet="{{ tpl.sujet }}" data-corps="{{ tpl.corps }}">{{ tpl.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Destinataires libres -->
+            <div class="card">
+                <h2>Destinataires libres <span style="font-weight:400; text-transform:none; font-size:0.82rem; color:var(--text-muted);">— hors base de données</span></h2>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 10px;">Ajoutez des adresses email qui ne sont pas dans votre CRM.</p>
+                <div id="freeList" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addFreeRow()">+ Ajouter un destinataire</button>
+            </div>
+
+            <!-- Envoi -->
+            <div class="card">
+                <h2>Envoi</h2>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">
+                    Chaque email sera personnalisé. Un log est créé automatiquement pour chaque envoi.
+                </p>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-success" style="flex:1; padding:12px;" onclick="sendMailing()" {% if not smtp_ok %}disabled title="Configurez le SMTP d'abord"{% endif %}>
+                        Envoyer la campagne
+                    </button>
+                    <span id="selCount" class="counter">0 sélectionné(s)</span>
+                </div>
+                <div id="sendResult" class="send-result"></div>
+            </div>
+        </div>
+
+        <!-- COLONNE DROITE : Prospects -->
+        <div>
+            <div class="card" style="padding:16px;">
+                <h2 style="margin-bottom:12px;">Destinataires <span id="selCount2" class="counter" style="margin-left:6px;">0</span></h2>
+
+                <!-- Mode sélection -->
+                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                    <button class="btn btn-outline btn-sm" style="flex:1;" onclick="setSelMode('multi')" id="btnMulti">Plusieurs</button>
+                    <button class="btn btn-outline btn-sm" style="flex:1;" onclick="setSelMode('single')" id="btnSingle">Un seul</button>
+                </div>
+
+                <!-- Filtres -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="fSearch" placeholder="Rechercher..." style="grid-column:1/-1;">
+                    <select id="fCat">
+                        <option value="">Toutes catégories</option>
+                        {% for cat in categories %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+                    </select>
+                    <select id="fStatut">
+                        <option value="">Tous statuts</option>
+                        {% for s in statuts %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                    </select>
+                </div>
+
+                <div id="bulkBtns" style="display:flex; gap:8px; margin-bottom:8px;">
+                    <button type="button" class="btn btn-outline btn-sm" style="flex:1;" onclick="checkAll(true)">Tout cocher</button>
+                    <button type="button" class="btn btn-outline btn-sm" style="flex:1;" onclick="checkAll(false)">Tout décocher</button>
+                </div>
+
+                <!-- Liste -->
+                <div id="pList" style="border:1px solid var(--border); border-radius:6px; max-height:520px; overflow-y:auto; background:var(--bg);">
+                    {% for p in prospects %}
+                    <div class="p-item"
+                         data-id="{{ p.id }}"
+                         data-name="{{ p.etablissement | lower }}"
+                         data-cat="{{ p.categorie | lower }}"
+                         data-statut="{{ p.statut | lower }}"
+                         data-has-email="{{ '1' if p.email else '0' }}">
+                        <input type="checkbox" class="p-check" value="{{ p.id }}" onchange="updateCount()" {% if not p.email or p.no_contact %}disabled title="{% if p.no_contact %}Opt-out RGPD — ne plus contacter{% else %}Pas d'email{% endif %}"{% endif %}>
+                        <span class="p-name">{{ p.etablissement }}</span>
+                        {% if p.no_contact %}
+                        <span class="no-email" style="color:var(--danger);">⊘ opt-out</span>
+                        {% elif p.email %}
+                        <span class="p-email">{{ p.email }}</span>
+                        {% else %}
+                        <span class="no-email">sans email</span>
+                        {% endif %}
+                        <span class="badge badge-cat">{{ p.categorie }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <p style="margin:8px 0 0; font-size:0.8rem; color:var(--text-muted);">
+                    {{ prospects | length }} prospect(s) — <span id="emailCount">{{ prospects | selectattr('email') | list | length }}</span> avec email
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal prévisualisation -->
+<div class="modal-overlay" id="previewModal">
+    <div class="modal">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3>Prévisualisation — <span id="previewProspect" style="color:var(--primary);"></span></h3>
+            <button class="btn btn-outline btn-sm" onclick="closePreview()">Fermer</button>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Objet</div>
+        <div class="preview-subject" id="previewSubject"></div>
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Corps du message</div>
+        <div class="preview-body" id="previewBody"></div>
+    </div>
+</div>
+
+<script>
+// ── Mode texte / HTML ──────────────────────────────
+let currentMode = 'text';
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('modeText').classList.toggle('btn-outline', mode !== 'text');
+    document.getElementById('modeHtml').classList.toggle('btn-outline', mode !== 'html');
+    document.getElementById('bodyEditor').style.fontFamily = mode === 'html' ? 'monospace' : 'inherit';
+}
+setMode('text');
+
+// ── Insertion de variables ─────────────────────────
+function insertVar(target, variable) {
+    if (target === 'subject') {
+        const el = document.getElementById('subject');
+        const pos = el.selectionStart;
+        el.value = el.value.slice(0, pos) + variable + el.value.slice(el.selectionEnd);
+        el.selectionStart = el.selectionEnd = pos + variable.length;
+        el.focus();
+    } else {
+        const el = document.getElementById('bodyEditor');
+        const pos = el.selectionStart;
+        el.value = el.value.slice(0, pos) + variable + el.value.slice(el.selectionEnd);
+        el.selectionStart = el.selectionEnd = pos + variable.length;
+        el.focus();
+    }
+}
+
+// ── Charger modèle depuis select ───────────────────
+function loadTplFromSelect() {
+    const sel = document.getElementById('tplSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    const sujet = opt.dataset.sujet || '';
+    const corps = opt.dataset.corps || '';
+    document.getElementById('subject').value = sujet;
+    document.getElementById('bodyEditor').value = corps;
+    sel.value = '';
+}
+
+// ── Mode sélection : plusieurs / un seul ──────────
+let selMode = 'multi';
+function setSelMode(mode) {
+    selMode = mode;
+    document.getElementById('btnMulti').classList.toggle('btn-outline', mode !== 'multi');
+    document.getElementById('btnSingle').classList.toggle('btn-outline', mode !== 'single');
+    document.getElementById('bulkBtns').style.display = mode === 'multi' ? 'flex' : 'none';
+    const checks = document.querySelectorAll('.p-check');
+    checks.forEach(cb => {
+        cb.type = mode === 'single' ? 'radio' : 'checkbox';
+        cb.name = mode === 'single' ? 'prospect_single' : '';
+    });
+    checkAll(false);
+}
+
+// ── Filtres ────────────────────────────────────────
+function applyFilters() {
+    const search = document.getElementById('fSearch').value.toLowerCase();
+    const cat    = document.getElementById('fCat').value.toLowerCase();
+    const statut = document.getElementById('fStatut').value.toLowerCase();
+    document.querySelectorAll('.p-item').forEach(item => {
+        const show = (!search || item.dataset.name.includes(search))
+                  && (!cat    || item.dataset.cat === cat)
+                  && (!statut || item.dataset.statut === statut);
+        item.style.display = show ? '' : 'none';
+    });
+}
+document.getElementById('fSearch').addEventListener('input', applyFilters);
+document.getElementById('fCat').addEventListener('change', applyFilters);
+document.getElementById('fStatut').addEventListener('change', applyFilters);
+
+// ── Compteur ───────────────────────────────────────
+function updateCount() {
+    const n = document.querySelectorAll('.p-check:checked').length;
+    document.getElementById('selCount').textContent = n + ' sélectionné(s)';
+    document.getElementById('selCount2').textContent = n;
+}
+
+function checkAll(state) {
+    document.querySelectorAll('.p-item:not([style*="display: none"]) .p-check:not(:disabled)').forEach(cb => cb.checked = state);
+    updateCount();
+}
+
+// ── Prévisualisation ───────────────────────────────
+function openPreview() {
+    const checked = document.querySelectorAll('.p-check:checked');
+    const pid = checked.length > 0 ? checked[0].value : null;
+    fetch('/mailing/preview', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            prospect_id: pid,
+            subject: document.getElementById('subject').value,
+            body: document.getElementById('bodyEditor').value,
+            csrf_token: '{{ csrf_token }}'
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.ok) { alert(data.message); return; }
+        document.getElementById('previewProspect').textContent = data.prospect;
+        document.getElementById('previewSubject').textContent = data.subject;
+        const bodyEl = document.getElementById('previewBody');
+        if (currentMode === 'html') {
+            bodyEl.innerHTML = data.body;
+        } else {
+            bodyEl.innerHTML = data.body.replace(/\n/g, '<br>');
+        }
+        document.getElementById('previewModal').classList.add('open');
+    });
+}
+function closePreview() {
+    document.getElementById('previewModal').classList.remove('open');
+}
+document.getElementById('previewModal').addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+});
+
+// ── Destinataires libres ───────────────────────────
+function addFreeRow() {
+    const list = document.getElementById('freeList');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:6px; align-items:center;';
+    row.innerHTML = `
+        <input type="email" placeholder="email@exemple.com" class="free-email" style="flex:2;">
+        <input type="text"  placeholder="Nom (optionnel)"   class="free-name"  style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" style="padding:7px 10px; color:var(--danger); border-color:var(--danger);" onclick="this.closest('div').remove()">✕</button>`;
+    list.appendChild(row);
+}
+
+// ── Envoi ──────────────────────────────────────────
+function sendMailing() {
+    const ids  = [...document.querySelectorAll('.p-check:checked')].map(cb => cb.value);
+    const free = [...document.querySelectorAll('#freeList > div')].map(row => ({
+        email: row.querySelector('.free-email').value.trim(),
+        name:  row.querySelector('.free-name').value.trim()
+    })).filter(r => r.email);
+
+    if (ids.length === 0 && free.length === 0) { alert('Sélectionnez au moins un destinataire.'); return; }
+    const subj = document.getElementById('subject').value.trim();
+    const body = document.getElementById('bodyEditor').value.trim();
+    if (!subj || !body) { alert('Remplissez l\'objet et le corps du message.'); return; }
+    const total = ids.length + free.length;
+    if (!confirm(`Envoyer cet email à ${total} destinataire(s) ?`)) return;
+
+    const resultEl = document.getElementById('sendResult');
+    resultEl.style.display = 'block';
+    resultEl.className = 'send-result';
+    resultEl.textContent = 'Envoi en cours…';
+
+    fetch('/mailing/send', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prospect_ids: ids, free_recipients: free, subject: subj, body: body, csrf_token: '{{ csrf_token }}' })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.ok) {
+            resultEl.className = 'send-result error';
+            resultEl.textContent = data.message;
+            showToast(data.message, 'error');
+            return;
+        }
+        resultEl.className = 'send-result success';
+        let msg = `Envoyé avec succès : ${data.sent} email(s).`;
+        if (data.skipped > 0) msg += ` ${data.skipped} ignoré(s) (sans email).`;
+        if (data.errors && data.errors.length > 0) {
+            msg += '\nErreurs :\n' + data.errors.join('\n');
+            resultEl.className = 'send-result error';
+            showToast(`${data.sent} envoyé(s), ${data.errors.length} erreur(s)`, 'warning');
+        } else {
+            showToast(`${data.sent} email(s) envoyé(s) avec succès`, 'success');
+        }
+        resultEl.innerHTML = msg.replace(/\n/g, '<br>');
+    })
+    .catch(() => {
+        resultEl.className = 'send-result error';
+        resultEl.textContent = 'Erreur réseau.';
+        showToast('Erreur réseau', 'error');
+    });
+}
+</script>
+</body></html>

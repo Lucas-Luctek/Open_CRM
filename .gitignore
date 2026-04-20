@@ -1,0 +1,38 @@
+# Environnement Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Configuration locale (contient des secrets)
+.env
+
+# Base de données
+crm.db
+
+# Fichiers uploadés par les utilisateurs
+uploads/
+
+# Sauvegardes
+backups/
+
+# Logs
+*.log
+
+# Fichiers internes
+CONTEXT.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

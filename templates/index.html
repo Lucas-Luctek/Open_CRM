@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Tableau de bord - {{ company_name }}</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background-color 0.2s; line-height: 1.5; }
+@media (max-width: 768px) {
+  .container { margin: 8px; padding: 14px; border-radius: 6px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-card { padding: 14px !important; }
+  .kpi-card .kpi-val { font-size: 1.6rem !important; }
+  .dash-grid { grid-template-columns: 1fr !important; }
+  h1 { font-size: 1.2rem; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 8px 10px; }
+}
+.container { max-width: 1400px; margin: 32px auto; background: var(--card); padding: 32px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1, h2, h3 { color: var(--text); font-weight: 600; margin-top: 0; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+h2 { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 0; font-weight: 700; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi-card { padding: 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); }
+.kpi-val { font-size: 2.2rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 6px;}
+.kpi-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+.kpi-card.danger { border-left: 3px solid var(--danger); }
+.kpi-card.success { border-left: 3px solid var(--success); }
+.kpi-card.warning { border-left: 3px solid var(--warning); }
+.kpi-card.primary { border-left: 3px solid var(--primary); }
+#mini-map { height: 280px; border-radius: 6px; border: 1px solid var(--border); }
+.alert-box { background: var(--bg); border-left: 4px solid var(--danger); padding: 14px 16px; border-radius: 0 6px 6px 0; margin-bottom: 16px; }
+.alert-today { background: rgba(220,38,38,0.08); border-left: 4px solid var(--danger); padding: 14px 16px; border-radius: 0 6px 6px 0; margin-bottom: 8px; }
+.alert-success { border-left-color: var(--success); }
+.relance-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.relance-item:last-child { border-bottom: none; }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.badge-today { background: rgba(220,38,38,0.1); color: var(--danger); border: 1px solid rgba(220,38,38,0.3); }
+.badge-late { background: rgba(217,119,6,0.1); color: var(--warning); border: 1px solid rgba(217,119,6,0.3); }
+.activite-item { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.activite-item:last-child { border-bottom: none; }
+.activite-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; background: var(--bg); border: 1px solid var(--border); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head><body class="{% if theme == 'dark' %}dark-mode{% endif %}">
+{% include '_navbar.html' %}
+<div class="container">
+    <h1>Tableau de bord commercial</h1>
+
+    <!-- KPIs row -->
+    <div class="kpi-grid">
+        <div class="kpi-card primary">
+            <div class="kpi-val">{{ total }}</div>
+            <div class="kpi-label">Prospects actifs</div>
+        </div>
+        <div class="kpi-card success">
+            <div class="kpi-val" style="color: var(--success);">{{ clients }}</div>
+            <div class="kpi-label">Clients convertis</div>
+        </div>
+        <div class="kpi-card warning">
+            <div class="kpi-val" style="color: var(--warning);">{{ taux_conversion }}%</div>
+            <div class="kpi-label">Taux de conversion</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-val" style="color: var(--primary);">{{ nouveaux_mois }}</div>
+            <div class="kpi-label">Nouveaux ce mois</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-val">{{ contactes_mois }}</div>
+            <div class="kpi-label">Contactés ce mois</div>
+        </div>
+        <div class="kpi-card {% if sans_suivi > 0 %}danger{% endif %}">
+            <div class="kpi-val" style="{% if sans_suivi > 0 %}color: var(--danger);{% endif %}">{{ sans_suivi }}</div>
+            <div class="kpi-label">Sans suivi</div>
+        </div>
+        <div class="kpi-card {% if a_relancer|length > 0 %}danger{% endif %}">
+            <div class="kpi-val" style="{% if a_relancer|length > 0 %}color: var(--danger);{% endif %}">{{ a_relancer|length }}</div>
+            <div class="kpi-label">Relances en retard</div>
+        </div>
+        <div class="kpi-card {% if relances_auj|length > 0 %}warning{% endif %}">
+            <div class="kpi-val" style="{% if relances_auj|length > 0 %}color: var(--warning);{% endif %}">{{ relances_auj|length }}</div>
+            <div class="kpi-label">Relances aujourd'hui</div>
+        </div>
+    </div>
+
+    <div class="dash-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Colonne gauche -->
+        <div>
+            <!-- Relances du jour (priorité visuelle) -->
+            {% if relances_auj %}
+            <div class="card" style="border-left: 4px solid var(--danger);">
+                <h2 style="color: var(--danger);">Relances à faire aujourd'hui ({{ relances_auj|length }})</h2>
+                {% for p in relances_auj %}
+                <div class="relance-item">
+                    <a href="/prospect/{{ p.id }}" style="color: var(--text); font-weight: 600; text-decoration: none;">{{ p.etablissement }}</a>
+                    <span class="badge badge-today">Aujourd'hui</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Toutes les relances en retard -->
+            {% if a_relancer %}
+            <div class="card">
+                <h2>Toutes les relances en attente ({{ a_relancer|length }})</h2>
+                {% for p in a_relancer %}
+                <div class="relance-item">
+                    <a href="/prospect/{{ p.id }}" style="color: var(--text); text-decoration: none;">{{ p.etablissement }}</a>
+                    <span class="badge badge-late">{{ p.date_relance }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card" style="border-left: 4px solid var(--success);">
+                <strong style="color: var(--success);">Aucune relance en attente.</strong>
+            </div>
+            {% endif %}
+
+            <!-- Graphiques -->
+            <div class="card"><h2>Répartition des qualifications</h2><canvas id="tempChart" style="max-height:220px;"></canvas></div>
+            <div class="card"><h2>Pipeline de conversion</h2><canvas id="funnelChart" style="max-height:220px;"></canvas></div>
+            {% if stats_categories %}
+            <div class="card"><h2>Conversion par catégorie</h2><canvas id="catChart" style="max-height:260px;"></canvas></div>
+            {% endif %}
+        </div>
+
+        <!-- Colonne droite -->
+        <div>
+            <!-- Activité récente -->
+            <div class="card">
+                <h2>Activité récente (7 derniers jours)</h2>
+                {% if activite_recente %}
+                {% for a in activite_recente %}
+                <div class="activite-item">
+                    <div class="activite-icon">
+                        {% if a.type_contact == 'Email' %}✉
+                        {% elif a.type_contact == 'Appel' %}📞
+                        {% elif a.type_contact == 'Visite' %}🤝
+                        {% else %}📝{% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600;"><a href="/prospect/{{ a.prospect_id }}" style="color: var(--text); text-decoration: none;">{{ a.etablissement }}</a></div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem;">{{ a.type_contact }} — {{ a.date_intervention }}</div>
+                        {% if a.compte_rendu %}<div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">{{ a.compte_rendu[:80] }}{% if a.compte_rendu|length > 80 %}…{% endif %}</div>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Aucune activité cette semaine.</p>
+                {% endif %}
+            </div>
+
+            <!-- Carte -->
+            <div class="card"><h2>Couverture géographique</h2><div id="mini-map"></div></div>
+        </div>
+    </div>
+</div>
+<script>
+    Chart.defaults.color = '#64748b'; Chart.defaults.font.family = '-apple-system, sans-serif';
+    new Chart(document.getElementById('funnelChart'), { type: 'bar', data: { labels: ['Contacts', 'Catalogue', 'Grille', 'Devis', 'Clients'], datasets: [{ data: [{{ funnel.contact }}, {{ funnel.catalogue }}, {{ funnel.grille }}, {{ funnel.devis }}, {{ funnel.client }}], backgroundColor: ['#94a3b8', '#3b82f6', '#d97706', '#8b5cf6', '#16a34a'], borderRadius: 4 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } });
+    {% if stats_categories %}
+    new Chart(document.getElementById('catChart'), { type: 'bar', data: {
+        labels: [{% for s in stats_categories %}"{{ s.categorie }}"{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [
+            { label: 'Total', data: [{% for s in stats_categories %}{{ s.total }}{% if not loop.last %},{% endif %}{% endfor %}], backgroundColor: '#3b82f6', borderRadius: 4 },
+            { label: 'Clients', data: [{% for s in stats_categories %}{{ s.clients }}{% if not loop.last %},{% endif %}{% endfor %}], backgroundColor: '#16a34a', borderRadius: 4 }
+        ]
+    }, options: { plugins: { legend: { position: 'top' } }, scales: { x: { stacked: false }, y: { beginAtZero: true } } } });
+    {% endif %}
+    new Chart(document.getElementById('tempChart'), { type: 'doughnut', data: { labels: ['Haute', 'Moyenne', 'Basse'], datasets: [{ data: [{{ temperatures.chaud }}, {{ temperatures.tiede }}, {{ temperatures.froid }}], backgroundColor: ['#dc2626', '#d97706', '#2563eb'], borderWidth: 2, borderColor: document.body.classList.contains('dark-mode') ? '#1e293b' : '#ffffff' }] }, options: { cutout: '70%', plugins: { legend: { position: 'right' } } } });
+    var map = L.map('mini-map').setView([49.0225, 3.9391], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var prospects = [{% for p in prospects if p.adresse %}{ id: {{ p.id }}, nom: {{ p.etablissement|tojson|safe }}, adresse: {{ p.adresse|tojson|safe }}, temp: {{ p.temperature|tojson|safe }} },{% endfor %}];
+    var iconChaud = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
+    var iconTiede = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
+    var iconFroid = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34] });
+    prospects.forEach((p, i) => { setTimeout(() => { fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(p.adresse)).then(r => r.json()).then(data => { if(data.features && data.features.length > 0) { var coords = data.features[0].geometry.coordinates; var cIcon = p.temp === "Chaud" ? iconChaud : (p.temp === "Tiède" ? iconTiede : iconFroid); L.marker([coords[1], coords[0]], {icon: cIcon}).addTo(map).bindPopup("<b style='font-family:-apple-system;'>" + p.nom + "</b><br><a href='/prospect/"+p.id+"'>Consulter</a>"); } }); }, i * 400); });
+</script></body></html>

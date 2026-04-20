@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Prospects - {{ company_name }}</title><style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background-color 0.2s; line-height: 1.5; }
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+  .container { margin: 8px; padding: 14px; border-radius: 6px; }
+  .filter-row { flex-direction: column; }
+  .filter-row input, .filter-row select { width: 100%; min-width: unset; }
+  .page-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+  .page-header .btn-group { flex-wrap: wrap; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -14px; padding: 0 14px; }
+  th, td { padding: 8px 10px; font-size: 0.82rem; }
+  /* Masquer colonnes secondaires sur très petit écran */
+  .col-cat, .col-qual, .col-activite { display: none; }
+}
+.container { max-width: 1400px; margin: 32px auto; background: var(--card); padding: 32px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1 { color: var(--text); font-weight: 600; margin-top: 0; font-size: 1.5rem; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+input, select, textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; background: var(--bg); color: var(--text); outline: none;}
+input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+button, .btn { background-color: var(--primary); color: #ffffff; border: none; cursor: pointer; font-weight: 500; font-size: 0.95rem; padding: 10px 16px; border-radius: 6px; transition: 0.2s; text-decoration: none; display: inline-block; text-align: center;}
+button:hover, .btn:hover { background-color: var(--primary-hover); }
+.btn-outline { background-color: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background-color: var(--bg); }
+.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; background: var(--bg);}
+.badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+.badge-gray { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border);}
+.badge-green { background: rgba(22, 163, 74, 0.1); color: var(--success); border: 1px solid rgba(22, 163, 74, 0.2);}
+.badge-blue { background: rgba(30, 64, 175, 0.1); color: var(--primary); border: 1px solid rgba(30, 64, 175, 0.2);}
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+.filter-row input, .filter-row select { width: auto; flex: 1; min-width: 140px; }
+.pagination { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; text-decoration: none; color: var(--text); background: var(--card); }
+.pagination a:hover { background: var(--bg); }
+.pagination .current { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600; }
+</style></head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">{% include '_navbar.html' %}
+<div class="container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 style="margin: 0; border: none; padding: 0;">Annuaire des Prospects <span style="font-size:1rem; color:var(--text-muted); font-weight:400;">({{ total_count }} résultat{% if total_count > 1 %}s{% endif %})</span></h1>
+        <div class="btn-group" style="display: flex; gap: 10px; flex-wrap:wrap;">
+            <a href="/import" class="btn btn-outline btn-sm">Import CSV</a>
+            <a href="/action_multiple" class="btn btn-sm">Action Groupée</a>
+            <a href="/corbeille" class="btn btn-outline btn-sm" style="color:var(--text-muted);" title="Prospects archivés">🗑 Corbeille</a>
+            {% if session['role'] == 'admin' %}<a href="/export" class="btn btn-outline btn-sm">Export CSV</a>{% endif %}
+        </div>
+    </div>
+
+    <form method="GET" action="/base" id="filterForm">
+        <div class="filter-row">
+            <input type="text" name="q" placeholder="Rechercher (nom, contact, ville...)" value="{{ q }}" style="flex:2; min-width:220px;">
+            <select name="statut">
+                <option value="">— Statut —</option>
+                {% for s in statuts %}<option value="{{ s }}" {% if f_statut == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+            <select name="categorie">
+                <option value="">— Catégorie —</option>
+                {% for cat in categories %}<option value="{{ cat }}" {% if f_categorie == cat %}selected{% endif %}>{{ cat }}</option>{% endfor %}
+            </select>
+            <select name="temperature">
+                <option value="">— Qualification —</option>
+                <option value="Chaud" {% if f_temperature == 'Chaud' %}selected{% endif %}>Chaud</option>
+                <option value="Tiède" {% if f_temperature == 'Tiède' %}selected{% endif %}>Tiède</option>
+                <option value="Froid" {% if f_temperature == 'Froid' %}selected{% endif %}>Froid</option>
+            </select>
+            <select name="ville">
+                <option value="">— Ville —</option>
+                {% for v in villes %}<option value="{{ v }}" {% if f_ville == v %}selected{% endif %}>{{ v }}</option>{% endfor %}
+            </select>
+            <select name="tag">
+                <option value="">— Tag —</option>
+                {% for t in all_tags %}<option value="{{ t }}" {% if f_tag == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+            </select>
+            <button type="submit" class="btn btn-sm">Filtrer</button>
+            {% if q or f_statut or f_categorie or f_temperature or f_ville or f_tag %}
+            <a href="/base" class="btn btn-outline btn-sm">Réinitialiser</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="table-wrap">
+    {% macro sort_link(col, label) %}
+        {% set next_order = 'asc' if (sort == col and order == 'desc') else 'desc' %}
+        <a href="?q={{ q }}&statut={{ f_statut }}&categorie={{ f_categorie }}&temperature={{ f_temperature }}&ville={{ f_ville }}&tag={{ f_tag }}&sort={{ col }}&order={{ next_order }}&page=1"
+           style="color:inherit; text-decoration:none; white-space:nowrap;">
+            {{ label }}{% if sort == col %} {{ '▲' if order == 'asc' else '▼' }}{% endif %}
+        </a>
+    {% endmacro %}
+
+    <table id="prospectTable">
+        <thead><tr>
+            <th>{{ sort_link('etablissement', 'Établissement') }}</th>
+            <th>Contact & Localisation</th>
+            <th class="col-cat">Catégorie</th>
+            <th>{{ sort_link('statut', 'Statut') }}</th>
+            <th class="col-qual">Qualification</th>
+            <th>{{ sort_link('date_relance', 'Relance') }}</th>
+            <th class="col-activite">{{ sort_link('derniere_activite', 'Dernière activité') }}</th>
+            <th>Action</th>
+        </tr></thead>
+        <tbody>{% for p in prospects %}<tr>
+            <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:9px; height:9px; border-radius:50%; flex-shrink:0; background:{% if p.temperature == 'Chaud' %}var(--danger){% elif p.temperature == 'Tiède' %}var(--warning){% else %}var(--primary){% endif %};" title="{{ p.temperature }}"></span>
+                    <div>
+                        <strong style="color: var(--text);">{{ p.etablissement }}</strong><br>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">{{ p.telephone|tel }}</span>
+                    </div>
+                </div>
+            </td>
+            <td>{{ p.contact }}<br><span style="font-size: 0.85rem; color: var(--text-muted);">{% if p.ville %}{{ p.ville }}{% else %}{{ p.adresse }}{% endif %}</span></td>
+            <td class="col-cat"><span class="badge badge-gray">{{ p.categorie }}</span></td>
+            <td><span class="badge {% if p.statut == 'Client !' %}badge-green{% else %}badge-blue{% endif %}">{{ p.statut }}</span></td>
+            <td class="col-qual">{{ p.temperature }}</td>
+            <td style="color:{% if p.date_relance and p.statut != 'Client !' %}var(--danger){% else %}inherit{% endif %}; font-weight: 500;">{{ p.date_relance or '-' }}</td>
+            <td class="col-activite" style="color:var(--text-muted); font-size:0.85rem;">{{ p.derniere_activite or '—' }}</td>
+            <td style="display:flex; gap:6px; align-items:center;">
+                <a href="/prospect/{{ p.id }}" class="btn btn-outline btn-sm">Consulter</a>
+                <button type="button" class="btn btn-outline btn-sm" style="color:var(--text-muted);" onclick="openNote({{ p.id }}, '{{ p.etablissement | replace("'", "\\'") }}')" title="Note rapide">+Note</button>
+            </td>
+        </tr>{% endfor %}
+        {% if not prospects %}
+        <tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:32px; font-style:italic;">Aucun résultat pour ces filtres.</td></tr>
+        {% endif %}
+        </tbody>
+    </table>
+    </div>{# /table-wrap #}
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% set base_qs = 'q=' ~ q ~ '&statut=' ~ f_statut ~ '&categorie=' ~ f_categorie ~ '&temperature=' ~ f_temperature ~ '&ville=' ~ f_ville ~ '&tag=' ~ f_tag ~ '&sort=' ~ sort ~ '&order=' ~ order %}
+        {% if page > 1 %}
+        <a href="?{{ base_qs }}&page={{ page - 1 }}">&laquo; Préc.</a>
+        {% endif %}
+        {% for p_num in range(1, total_pages + 1) %}
+            {% if p_num == page %}
+            <span class="current">{{ p_num }}</span>
+            {% elif p_num == 1 or p_num == total_pages or (p_num >= page - 2 and p_num <= page + 2) %}
+            <a href="?{{ base_qs }}&page={{ p_num }}">{{ p_num }}</a>
+            {% elif p_num == page - 3 or p_num == page + 3 %}
+            <span>…</span>
+            {% endif %}
+        {% endfor %}
+        {% if page < total_pages %}
+        <a href="?{{ base_qs }}&page={{ page + 1 }}">Suiv. &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+<!-- Modal note rapide -->
+<div id="noteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--card); border-radius:8px; padding:24px; width:100%; max-width:460px; border:1px solid var(--border);">
+        <h3 id="noteTitle" style="margin:0 0 14px; font-size:1rem; color:var(--text);"></h3>
+        <form id="noteForm" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <textarea name="note" rows="4" required placeholder="Saisir votre note…" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:0.9rem; background:var(--bg); color:var(--text); resize:vertical; box-sizing:border-box;"></textarea>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button type="submit" style="flex:1; background:var(--primary); color:#fff; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem;">Enregistrer</button>
+                <button type="button" onclick="closeNote()" style="flex:0 0 auto; background:transparent; border:1px solid var(--border); color:var(--text); padding:10px 16px; border-radius:6px; cursor:pointer; font-size:0.9rem;">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+var noteModal = document.getElementById('noteModal');
+function openNote(id, nom) {
+    document.getElementById('noteTitle').textContent = 'Note rapide — ' + nom;
+    document.getElementById('noteForm').action = '/prospect/' + id + '/note-rapide';
+    document.getElementById('noteForm').querySelector('textarea').value = '';
+    noteModal.style.display = 'flex';
+}
+function closeNote() { noteModal.style.display = 'none'; }
+noteModal.addEventListener('click', function(e) { if (e.target === this) closeNote(); });
+</script>
+</body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Communications - {{ company_name }}</title>
+<style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+.container { max-width: 1200px; margin: 28px auto; padding: 0 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 4px 0; }
+h2 { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+thead th { text-align: left; padding: 10px 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 2px solid var(--border); background: var(--bg); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(30,64,175,0.03); }
+td { padding: 10px 12px; vertical-align: middle; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.badge-sent  { background: rgba(22,163,74,0.12);  color: var(--success); }
+.badge-error { background: rgba(220,38,38,0.12); color: var(--danger); }
+.badge-free  { background: rgba(212,175,55,0.15); color: #7a5c00; border: 1px solid rgba(212,175,55,0.4); }
+body.dark-mode .badge-free { color: var(--accent); }
+.filter-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+.filter-bar input, .filter-bar select { padding: 8px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem; background: var(--bg); color: var(--text); outline: none; font-family: inherit; }
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--primary); }
+.empty { text-align:center; padding: 48px 20px; color: var(--text-muted); font-size: 0.95rem; }
+.error-tip { font-size: 0.78rem; color: var(--danger); margin-top: 2px; }
+a.prospect-link { color: var(--primary); text-decoration: none; font-weight: 600; }
+a.prospect-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">
+{% include '_navbar.html' %}
+
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h1>Communications</h1>
+            <p style="margin:0; color:var(--text-muted); font-size:0.9rem;">Historique de tous les emails envoyés depuis le CRM.</p>
+        </div>
+        <a href="/mailing" class="btn" style="background:var(--primary); color:#fff; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:600; font-size:0.9rem;">Nouveau mailing</a>
+    </div>
+
+    <div class="card">
+        <div class="filter-bar">
+            <input type="text" id="fSearch" placeholder="Rechercher destinataire, sujet…" style="flex:1; min-width:200px;">
+            <select id="fStatus">
+                <option value="">Tous les statuts</option>
+                <option value="sent">Envoyé</option>
+                <option value="error">Erreur</option>
+            </select>
+            <select id="fType">
+                <option value="">Tous types</option>
+                <option value="prospect">Prospect BDD</option>
+                <option value="free">Hors BDD</option>
+            </select>
+        </div>
+
+        {% if logs %}
+        <div style="overflow-x:auto;">
+        <table id="logsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Destinataire</th>
+                    <th>Email</th>
+                    <th>Objet</th>
+                    <th>Statut</th>
+                    <th>Envoyé par</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr data-search="{{ (log.to_name or '') | lower }} {{ (log.to_email or '') | lower }} {{ (log.subject or '') | lower }}"
+                    data-status="{{ log.status }}"
+                    data-type="{{ 'prospect' if log.prospect_id else 'free' }}">
+                    <td style="white-space:nowrap; color:var(--text-muted);">{{ log.sent_at[:16] if log.sent_at else '—' }}</td>
+                    <td>
+                        {% if log.prospect_id %}
+                        <a href="/prospect/{{ log.prospect_id }}" class="prospect-link">{{ log.to_name or log.to_email }}</a>
+                        {% else %}
+                        <span>{{ log.to_name or log.to_email }}</span>
+                        <span class="badge badge-free" style="margin-left:4px;">Hors BDD</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--text-muted); font-size:0.82rem;">{{ log.to_email }}</td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ log.subject }}">{{ log.subject or '—' }}</td>
+                    <td>
+                        {% if log.status == 'sent' %}
+                        <span class="badge badge-sent">Envoyé</span>
+                        {% else %}
+                        <div><span class="badge badge-error">Erreur</span>
+                        {% if log.error_msg %}<div class="error-tip">{{ log.error_msg[:80] }}</div>{% endif %}</div>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--text-muted);">{{ log.sender_username or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <p style="margin:10px 0 0; font-size:0.8rem; color:var(--text-muted);" id="rowCount"></p>
+        {% else %}
+        <div class="empty">Aucun email envoyé pour l'instant.<br>Commencez par envoyer une campagne depuis <a href="/mailing" style="color:var(--primary);">Mailing</a>.</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const search = document.getElementById('fSearch').value.toLowerCase();
+    const status = document.getElementById('fStatus').value;
+    const type   = document.getElementById('fType').value;
+    let visible  = 0;
+    document.querySelectorAll('#logsTable tbody tr').forEach(tr => {
+        const matchSearch = !search || tr.dataset.search.includes(search);
+        const matchStatus = !status || tr.dataset.status === status;
+        const matchType   = !type   || tr.dataset.type   === type;
+        const show = matchSearch && matchStatus && matchType;
+        tr.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const total = document.querySelectorAll('#logsTable tbody tr').length;
+    const rc = document.getElementById('rowCount');
+    if (rc) rc.textContent = visible + ' / ' + total + ' email(s) affiché(s)';
+}
+document.getElementById('fSearch').addEventListener('input', applyFilters);
+document.getElementById('fStatus').addEventListener('change', applyFilters);
+document.getElementById('fType').addEventListener('change', applyFilters);
+applyFilters();
+</script>
+</body></html>

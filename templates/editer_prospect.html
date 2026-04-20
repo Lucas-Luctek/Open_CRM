@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Éditer Prospect</title><style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background-color 0.2s; line-height: 1.5; }
+
+
+
+
+
+
+
+@media (max-width: 768px) {    .container { margin: 12px; padding: 16px; } .form-row { grid-template-columns: 1fr; } }
+.container { max-width: 1200px; margin: 32px auto; background: var(--card); padding: 32px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1, h2, h3 { color: var(--text); font-weight: 600; margin-top: 0; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+h2 { font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; margin-top: 24px;}
+.form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+input, select, textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; font-family: inherit; width: 100%; box-sizing: border-box; background: var(--bg); color: var(--text); outline: none;}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+button, .btn { background-color: var(--primary); color: #ffffff; border: none; cursor: pointer; font-weight: 500; font-size: 0.95rem; padding: 10px 16px; border-radius: 6px; transition: 0.2s; text-decoration: none; display: inline-block; text-align: center;}
+button:hover, .btn:hover { background-color: var(--primary-hover); }
+.btn-outline { background-color: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background-color: var(--bg); }
+.btn-danger { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn-danger:hover { background-color: var(--danger); color: #ffffff; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; background: var(--bg);}
+.badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+.badge-gray { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border);}
+.badge-green { background: rgba(22, 163, 74, 0.1); color: var(--success); border: 1px solid rgba(22, 163, 74, 0.2);}
+.badge-blue { background: rgba(30, 64, 175, 0.1); color: var(--primary); border: 1px solid rgba(30, 64, 175, 0.2);}
+.badge-red { background: rgba(220, 38, 38, 0.1); color: var(--danger); border: 1px solid rgba(220, 38, 38, 0.2);}
+.alert-box { background: var(--bg); border-left: 4px solid var(--danger); padding: 16px; border-radius: 0 6px 6px 0; margin-bottom: 24px;}
+.alert-success { border-left-color: var(--success); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+</style></head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">{% include '_navbar.html' %}
+<div class="container" style="max-width:800px;">
+    <h1>Édition : {{ prospect.etablissement }}</h1>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <h2>Informations Générales</h2>
+        <div class="form-row"><div class="form-group"><label>Établissement</label><input type="text" name="etablissement" value="{{ prospect.etablissement }}" required></div><div class="form-group"><label>Contact</label><input type="text" name="contact" value="{{ prospect.contact }}"></div></div>
+        <div class="form-row"><div class="form-group"><label>Téléphone</label><input type="tel" name="telephone" id="tel-input" value="{{ prospect.telephone }}" placeholder="03 XX XX XX XX" maxlength="14"></div><div class="form-group"><label>Email</label><input type="email" name="email" value="{{ prospect.email }}"></div></div>
+        <div class="form-group"><label>Adresse (rue, numéro)</label><input type="text" name="adresse" value="{{ prospect.adresse }}"></div>
+        <div class="form-row">
+            <div class="form-group"><label>Code Postal</label><input type="text" name="code_postal" id="code_postal" value="{{ prospect.code_postal }}" placeholder="51000" maxlength="5"></div>
+            <div class="form-group"><label>Ville</label><input type="text" name="ville" id="ville" value="{{ prospect.ville }}" placeholder="Rempli automatiquement"></div>
+        </div>
+        
+        <h2>Données Commerciales</h2>
+        <div style="background:var(--bg); padding:16px; border-radius:6px; border:1px solid var(--border); display:flex; gap:24px; margin-bottom:24px;">
+            <label style="margin:0; display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; color:var(--text);"><input type="checkbox" name="catalogue" value="1" {% if prospect.catalogue %}checked{% endif %}> Catalogue</label>
+            <label style="margin:0; display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; color:var(--text);"><input type="checkbox" name="grille" value="1" {% if prospect.grille %}checked{% endif %}> Grille</label>
+            <label style="margin:0; display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; color:var(--text);"><input type="checkbox" name="devis" value="1" {% if prospect.devis %}checked{% endif %}> Devis</label>
+        </div>
+        <div class="form-row"><div class="form-group"><label>Catégorie</label><select name="categorie"><option {% if prospect.categorie == 'Caviste' %}selected{% endif %}>Caviste</option><option {% if prospect.categorie == 'CHR' %}selected{% endif %}>CHR</option><option {% if prospect.categorie == 'Entreprise' %}selected{% endif %}>Entreprise</option><option {% if prospect.categorie == 'Particulier VIP' %}selected{% endif %}>Particulier VIP</option></select></div><div class="form-group"><label>Statut</label><select name="statut"><option {% if prospect.statut == 'À contacter' %}selected{% endif %}>À contacter</option><option {% if prospect.statut == 'Premier contact établi' %}selected{% endif %}>Premier contact établi</option><option {% if prospect.statut == 'Client !' %}selected{% endif %}>Client !</option></select></div></div>
+        <div class="form-row"><div class="form-group"><label>Qualification</label><select name="temperature"><option value="Froid" {% if prospect.temperature == 'Froid' %}selected{% endif %}>Basse (Froid)</option><option value="Tiède" {% if prospect.temperature == 'Tiède' %}selected{% endif %}>Moyenne (Tiède)</option><option value="Chaud" {% if prospect.temperature == 'Chaud' %}selected{% endif %}>Haute (Chaud)</option></select></div><div class="form-group"><label>Relance</label><input type="date" name="date_relance" value="{{ prospect.date_relance }}"></div></div>
+        <div class="form-group"><label>Notes</label><textarea name="commentaire" rows="4">{{ prospect.commentaire }}</textarea></div>
+
+        <h2>Conformité RGPD</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Source des données</label>
+                <select name="source">
+                    <option value="">— Non renseigné —</option>
+                    <option value="Prospection terrain" {% if prospect.source == 'Prospection terrain' %}selected{% endif %}>Prospection terrain</option>
+                    <option value="Salon / Événement" {% if prospect.source == 'Salon / Événement' %}selected{% endif %}>Salon / Événement</option>
+                    <option value="Site web" {% if prospect.source == 'Site web' %}selected{% endif %}>Site web</option>
+                    <option value="Recommandation" {% if prospect.source == 'Recommandation' %}selected{% endif %}>Recommandation</option>
+                    <option value="Achat fichier" {% if prospect.source == 'Achat fichier' %}selected{% endif %}>Achat fichier</option>
+                    <option value="Appel entrant" {% if prospect.source == 'Appel entrant' %}selected{% endif %}>Appel entrant</option>
+                    <option value="Réseau social" {% if prospect.source == 'Réseau social' %}selected{% endif %}>Réseau social</option>
+                    <option value="Autre" {% if prospect.source == 'Autre' %}selected{% endif %}>Autre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Base légale du traitement</label>
+                <select name="base_legale">
+                    <option value="">— Non renseigné —</option>
+                    <option value="Intérêt légitime" {% if prospect.base_legale == 'Intérêt légitime' %}selected{% endif %}>Intérêt légitime (prospection B2B)</option>
+                    <option value="Contrat" {% if prospect.base_legale == 'Contrat' %}selected{% endif %}>Exécution d'un contrat</option>
+                    <option value="Consentement" {% if prospect.base_legale == 'Consentement' %}selected{% endif %}>Consentement explicite</option>
+                    <option value="Obligation légale" {% if prospect.base_legale == 'Obligation légale' %}selected{% endif %}>Obligation légale</option>
+                </select>
+            </div>
+        </div>
+        <div style="background:rgba(220,38,38,0.05); border:1px solid rgba(220,38,38,0.2); border-radius:6px; padding:12px 14px; margin-bottom:16px;">
+            <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:none; color:var(--danger); font-size:0.9rem;">
+                <input type="checkbox" name="no_contact" value="1" {% if prospect.no_contact %}checked{% endif %} style="width:16px; height:16px; accent-color:var(--danger);">
+                <span><strong>Ne plus contacter (opt-out RGPD)</strong> — Bloque tous les envois d'emails vers ce prospect</span>
+            </label>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:16px;">
+            <button type="submit" style="flex:1;">Mettre à jour le prospect</button>
+            <a href="/prospect/{{ prospect.id }}" class="btn btn-outline" style="flex:0 0 auto;">Annuler</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('tel-input').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').substring(0, 10);
+    this.value = v.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+});
+document.getElementById('code_postal').addEventListener('blur', function() {
+    let cp = this.value.trim();
+    if (cp.length === 5 && !document.getElementById('ville').value) {
+        fetch('https://geo.api.gouv.fr/communes?codePostal=' + cp + '&fields=nom&limit=1')
+            .then(r => r.json()).then(data => {
+                if (data && data.length > 0) document.getElementById('ville').value = data[0].nom;
+            }).catch(() => {});
+    }
+});
+</script></body></html>

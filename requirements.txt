@@ -1,0 +1,4 @@
+Flask>=2.3.0
+Werkzeug>=2.3.0
+APScheduler>=3.10.0
+weasyprint>=60.0

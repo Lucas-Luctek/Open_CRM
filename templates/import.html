@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Import CSV - {{ company_name }}</title><style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; }
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+
+
+
+
+
+
+
+.container { max-width: 700px; margin: 40px auto; background: var(--card); padding: 40px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1 { font-size: 1.5rem; font-weight: 600; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 32px; margin-bottom: 12px; }
+label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+input[type=file] { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; box-sizing: border-box; margin-bottom: 20px; }
+button, .btn { background-color: var(--primary); color: #ffffff; border: none; cursor: pointer; font-weight: 500; font-size: 0.95rem; padding: 10px 20px; border-radius: 6px; transition: 0.2s; text-decoration: none; display: inline-block; }
+button:hover, .btn:hover { background-color: var(--primary-hover); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.alert { padding: 14px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; }
+.alert-error { background: rgba(220,38,38,0.08); border-left: 4px solid var(--danger); color: var(--danger); }
+.alert-success { background: rgba(22,163,74,0.08); border-left: 4px solid var(--success); color: var(--success); }
+code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-muted); background: var(--bg); text-transform: uppercase; font-size: 0.75rem; }
+</style></head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">
+{% include '_navbar.html' %}
+<div class="container">
+    <h1>Import CSV</h1>
+
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+    {% if success %}<div class="alert alert-success">{{ success }} <a href="/base" style="margin-left:12px; color:inherit; text-decoration:underline;">Voir les comptes</a></div>{% endif %}
+
+    <form method="POST" action="/import" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>Fichier CSV</label>
+        <input type="file" name="fichier" accept=".csv" required>
+        <div style="margin-bottom:16px;">
+            <label>Séparateur de colonnes</label>
+            <div style="display:flex; gap:16px; margin-top:4px;">
+                <label style="text-transform:none; font-weight:400; font-size:0.9rem; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="radio" name="separateur" value=";" checked> Point-virgule <code>;</code> (défaut)</label>
+                <label style="text-transform:none; font-weight:400; font-size:0.9rem; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="radio" name="separateur" value=","> Virgule <code>,</code></label>
+                <label style="text-transform:none; font-weight:400; font-size:0.9rem; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="radio" name="separateur" value="	"> Tabulation</label>
+            </div>
+        </div>
+        <div style="display:flex; gap:12px;">
+            <button type="submit">Importer</button>
+            <a href="/base" class="btn btn-outline">Annuler</a>
+        </div>
+    </form>
+    {% if detected_cols %}
+    <div style="background:rgba(30,64,175,0.06); border:1px solid rgba(30,64,175,0.2); border-radius:6px; padding:12px 14px; margin-top:16px; font-size:0.85rem;">
+        <strong>Colonnes détectées dans le fichier :</strong>
+        <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+            {% for col in detected_cols %}
+            <span style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-family:monospace; font-size:0.8rem;">{{ col }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <h2>Format attendu</h2>
+    <p style="font-size:0.9rem; color:var(--text-muted);">Fichier CSV séparé par <code>;</code>, encodage UTF-8. La première ligne doit contenir les en-têtes. Seul le champ <strong>Établissement</strong> est obligatoire.</p>
+
+    <table>
+        <thead><tr><th>Colonne CSV</th><th>Description</th><th>Exemple</th></tr></thead>
+        <tbody>
+            <tr><td><code>Établissement</code></td><td>Nom (obligatoire)</td><td>Restaurant Le Bistrot</td></tr>
+            <tr><td><code>Contact</code></td><td>Nom du contact</td><td>Jean Dupont</td></tr>
+            <tr><td><code>Téléphone</code></td><td>Numéro</td><td>03 26 12 34 56</td></tr>
+            <tr><td><code>Email</code></td><td>Adresse email</td><td>contact@bistrot.fr</td></tr>
+            <tr><td><code>Adresse</code></td><td>Rue</td><td>12 rue de la Paix</td></tr>
+            <tr><td><code>Code Postal</code></td><td>Code postal</td><td>51100</td></tr>
+            <tr><td><code>Ville</code></td><td>Ville</td><td>Reims</td></tr>
+            <tr><td><code>Catégorie</code></td><td>Type d'établissement</td><td>Restaurant</td></tr>
+            <tr><td><code>Statut</code></td><td>Statut commercial</td><td>À relancer</td></tr>
+            <tr><td><code>Température</code></td><td>Chaud / Tiède / Froid</td><td>Tiède</td></tr>
+            <tr><td><code>Catalogue</code></td><td>Oui / Non</td><td>Non</td></tr>
+            <tr><td><code>Grille</code></td><td>Oui / Non</td><td>Non</td></tr>
+            <tr><td><code>Devis</code></td><td>Oui / Non</td><td>Non</td></tr>
+            <tr><td><code>Date relance</code></td><td>Format AAAA-MM-JJ</td><td>2026-05-15</td></tr>
+            <tr><td><code>Commentaire</code></td><td>Notes libres</td><td>Intéressé par le brut</td></tr>
+        </tbody>
+    </table>
+
+    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:16px;">Le fichier d'export CSV du CRM est directement compatible avec cet import (sans la colonne ID ni Date ajout).</p>
+</div>
+<script></script>
+</body></html>

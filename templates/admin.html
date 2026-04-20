@@ -1,0 +1,570 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.ico"><title>Administration - {{ company_name }}</title><style>
+:root { --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #1e40af; --primary-hover: #1e3a8a; --accent: #d4af37; --border: #cbd5e1; --danger: #dc2626; --success: #16a34a; --warning: #d97706;}
+body.dark-mode { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-hover: #60a5fa; --border: #334155; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+.container { max-width: 960px; margin: 28px auto; padding: 0 16px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+h1 { font-size: 1.4rem; font-weight: 700; margin: 0 0 4px 0; }
+h2 { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 14px 0; }
+h3 { font-size: 1rem; font-weight: 600; margin: 0 0 12px; }
+label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px; }
+input, select, textarea { padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; font-family: inherit; background: var(--bg); color: var(--text); outline: none; box-sizing: border-box; }
+input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+.btn { background-color: var(--primary); color: #fff; border: none; cursor: pointer; font-weight: 600; font-size: 0.88rem; padding: 9px 16px; border-radius: 6px; transition: 0.2s; text-decoration: none; display: inline-block; font-family: inherit; }
+.btn:hover { background-color: var(--primary-hover); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-warning { background: transparent; color: var(--warning); border: 1px solid var(--warning); }
+.btn-warning:hover { background: var(--warning); color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.5px; background: var(--bg); }
+.badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; }
+.badge-admin { background: rgba(212,175,55,0.15); color: var(--accent); border: 1px solid rgba(212,175,55,0.3); }
+.badge-commercial { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+.alert-success { background: rgba(22,163,74,0.1); color: var(--success); border: 1px solid rgba(22,163,74,0.3); padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem; }
+.alert-error { background: rgba(220,38,38,0.1); color: var(--danger); border: 1px solid rgba(220,38,38,0.3); padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { margin-bottom: 14px; }
+.admin-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; overflow-x: auto; }
+.admin-tab { background: none; border: none; padding: 12px 20px; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit; transition: 0.2s; white-space: nowrap; }
+.admin-tab:hover { color: var(--text); }
+.admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+.tpl-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
+.tpl-card h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.tpl-sujet { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 8px; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--card); border-radius:8px; padding:28px; width:100%; max-width:500px; border:1px solid var(--border); max-height:90vh; overflow-y:auto; }
+.modal h3 { margin:0 0 16px; }
+.modal-actions { display:flex; gap:10px; margin-top:20px; }
+.var-btn { display:inline-block; padding:2px 7px; margin:2px; background:rgba(30,64,175,0.08); border:1px solid rgba(30,64,175,0.2); border-radius:4px; font-size:0.78rem; font-family:monospace; color:var(--primary); cursor:pointer; }
+.var-btn:hover { background:rgba(30,64,175,0.15); }
+@media (max-width: 768px) {
+  .container { margin: 8px; padding: 14px; border-radius: 6px; }
+  .form-row { grid-template-columns: 1fr; }
+  th, td { padding: 8px; font-size: 0.8rem; }
+  .admin-tabs a, .admin-tabs button { padding: 10px 10px; font-size: 0.78rem; }
+  .card { padding: 14px; }
+  .modal { padding: 16px; max-width: 98vw; }
+}
+</style></head>
+<body class="{% if theme == 'dark' %}dark-mode{% endif %}">
+{% include '_navbar.html' %}
+
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+        <h1>Administration</h1>
+        <a href="/admin/logs" class="btn btn-outline btn-sm">Journaux de connexion</a>
+    </div>
+
+    {% if success %}<div class="alert-success">{{ success }}</div>{% endif %}
+    {% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
+
+    <div class="admin-tabs">
+        <button class="admin-tab" data-tab="users" onclick="switchTab('users')">Gestion utilisateurs</button>
+        <button class="admin-tab" data-tab="perso" onclick="switchTab('perso')">Personnalisation</button>
+        <button class="admin-tab" data-tab="mailing" onclick="switchTab('mailing')">Mailing</button>
+        <button class="admin-tab" data-tab="rgpd" onclick="switchTab('rgpd')">RGPD</button>
+        <button class="admin-tab" data-tab="danger" onclick="switchTab('danger')">Zone de danger</button>
+    </div>
+
+    <!-- ONGLET UTILISATEURS -->
+    <div class="tab-pane" id="tab-users">
+        <div class="card">
+            <h2>Utilisateurs existants</h2>
+            <table>
+                <thead><tr><th>Nom d'utilisateur</th><th>Rôle</th><th style="text-align:right;">Actions</th></tr></thead>
+                <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.username }}</strong></td>
+                    <td>{% if u.role == 'admin' %}<span class="badge badge-admin">Admin</span>{% else %}<span class="badge badge-commercial">Commercial</span>{% endif %}</td>
+                    <td style="text-align:right;">
+                        <div style="display:flex; gap:6px; justify-content:flex-end;">
+                            <button class="btn btn-warning btn-sm" onclick="openResetModal({{ u.id }}, '{{ u.username }}')">Réinitialiser mdp</button>
+                            {% if session['user_id'] != u.id %}
+                            <form action="/admin/supprimer/{{ u.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer {{ u.username }} ?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                            </form>
+                            {% else %}
+                            <span style="font-size:0.8rem; color:var(--text-muted);">Vous-même</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Ajouter un utilisateur</h2>
+            <form action="/admin/ajouter" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-row">
+                    <div><label>Nom d'utilisateur</label><input type="text" name="username" placeholder="nom_utilisateur" required style="width:100%;"></div>
+                    <div><label>Rôle</label><select name="role" style="width:100%;"><option value="commercial">Commercial</option><option value="admin">Administrateur</option></select></div>
+                </div>
+                <div class="form-group"><label>Mot de passe (min. 6 caractères)</label><input type="password" name="password" required minlength="6" style="width:100%;"></div>
+                <button type="submit" class="btn">+ Créer l'utilisateur</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ONGLET PERSONNALISATION -->
+    <div class="tab-pane" id="tab-perso">
+        <div class="card">
+            <h2>Informations de l'entreprise</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 16px;">Ces informations sont utilisables comme variables dans vos modèles d'email : <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company}}</code> <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company_adresse}}</code> <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company_tel}}</code> <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company_email}}</code> <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company_site}}</code> <code style="background:var(--bg);padding:1px 5px;border-radius:3px;">{{company_siret}}</code> etc.</p>
+            <form action="/admin/settings" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-row">
+                    <div><label>Nom de l'entreprise *</label><input type="text" name="company_name" value="{{ company_info.name }}" required maxlength="80" style="width:100%;"></div>
+                    <div><label>Forme juridique</label><input type="text" name="company_forme" value="{{ company_info.forme }}" placeholder="SARL, SAS, EI, SA…" style="width:100%;"></div>
+                    <div><label>Adresse</label><input type="text" name="company_adresse" value="{{ company_info.adresse }}" placeholder="12 rue de la Paix" style="width:100%;"></div>
+                    <div style="display:grid; grid-template-columns:120px 1fr; gap:8px;">
+                        <div><label>Code postal</label><input type="text" name="company_cp" value="{{ company_info.cp }}" placeholder="75001" style="width:100%;"></div>
+                        <div><label>Ville</label><input type="text" name="company_ville" value="{{ company_info.ville }}" placeholder="Paris" style="width:100%;"></div>
+                    </div>
+                    <div><label>Région</label><input type="text" name="company_region" value="{{ company_info.region }}" placeholder="Île-de-France" style="width:100%;"></div>
+                    <div><label>Téléphone</label><input type="tel" name="company_telephone" value="{{ company_info.telephone }}" placeholder="01 23 45 67 89" style="width:100%;"></div>
+                    <div><label>Email de l'entreprise</label><input type="email" name="company_email" value="{{ company_info.email }}" placeholder="contact@monentreprise.fr" style="width:100%;"></div>
+                    <div><label>Site web</label><input type="text" name="company_site" value="{{ company_info.site }}" placeholder="www.monentreprise.fr" style="width:100%;"></div>
+                    <div><label>Numéro SIRET</label><input type="text" name="company_siret" value="{{ company_info.siret }}" placeholder="12345678901234" maxlength="17" style="width:100%;"></div>
+                    <div><label>Numéro TVA intracommunautaire</label><input type="text" name="company_tva" value="{{ company_info.tva }}" placeholder="FR12345678901" style="width:100%;"></div>
+                    <div><label>Code NAF / APE</label><input type="text" name="company_naf" value="{{ company_info.naf }}" placeholder="4669B" style="width:100%;"></div>
+                </div>
+                <button type="submit" class="btn" style="margin-top:6px;">Enregistrer les informations</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2>Logo</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">Affiché sur la page de connexion. Formats : PNG, JPG, SVG, ICO.</p>
+            {% if logo_url %}
+            <div style="margin-bottom:16px;">
+                <img src="{{ logo_url }}" alt="Logo" style="max-height:60px; max-width:200px; object-fit:contain; border:1px solid var(--border); border-radius:6px; padding:8px; background:white;">
+                <span style="font-size:0.85rem; color:var(--text-muted); margin-left:10px;">Logo actuel</span>
+            </div>
+            {% endif %}
+            <form action="/admin/upload-logo" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                    <input type="file" name="logo" accept="image/*" required style="flex:1;">
+                    <button type="submit" class="btn">Télécharger</button>
+                </div>
+            </form>
+        </div>
+        <div class="card">
+            <h2>Couleurs de l'interface</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 16px;">Personnalisez les couleurs principales. Les modifications s'appliquent immédiatement à toutes les pages.</p>
+            <form action="/admin/colors" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-row">
+                    <div>
+                        <label>Couleur principale (boutons, liens)</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="color" name="color_primary" id="colorPrimaryPicker" value="{{ custom_colors.primary or '#1e40af' }}" style="width:48px; height:40px; padding:2px; cursor:pointer; flex-shrink:0;">
+                            <input type="text" id="colorPrimaryTxt" value="{{ custom_colors.primary or '#1e40af' }}" placeholder="#1e40af" style="flex:1;">
+                        </div>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">Défaut : #1e40af</p>
+                    </div>
+                    <div>
+                        <label>Couleur accentuation (barre de nav)</label>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="color" name="color_accent" id="colorAccentPicker" value="{{ custom_colors.accent or '#d4af37' }}" style="width:48px; height:40px; padding:2px; cursor:pointer; flex-shrink:0;">
+                            <input type="text" id="colorAccentTxt" value="{{ custom_colors.accent or '#d4af37' }}" placeholder="#d4af37" style="flex:1;">
+                        </div>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 0;">Défaut : #d4af37</p>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="submit" class="btn">Appliquer les couleurs</button>
+                    <a href="/admin/colors/reset" class="btn btn-outline">Réinitialiser par défaut</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ONGLET MAILING -->
+    <div class="tab-pane" id="tab-mailing">
+
+        <!-- Toggle activation mailing -->
+        <div class="card">
+            <h2>Activation du module Mailing</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 16px;">
+                Désactiver masque les pages Mailing et Historique emails dans la navigation et bloque les envois.
+                Utile si votre entreprise n'utilise pas d'email ou utilise un outil externe.
+            </p>
+            <form action="/admin/toggle-mailing" method="POST" style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:none; font-size:0.95rem; color:var(--text);">
+                    <input type="checkbox" name="mailing_enabled" value="1" {% if mailing_enabled %}checked{% endif %}
+                           onchange="this.form.submit()" style="width:18px; height:18px; accent-color:var(--primary);">
+                    <span>Mailing activé</span>
+                </label>
+                <span style="font-size:0.82rem; color:{% if mailing_enabled %}var(--success){% else %}var(--danger){% endif %}; font-weight:600;">
+                    {% if mailing_enabled %}● Actif{% else %}○ Désactivé{% endif %}
+                </span>
+            </form>
+        </div>
+
+        <!-- Relances automatiques -->
+        <div class="card">
+            <h2>Relances automatiques</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">
+                Si activé, un email récapitulatif des relances du jour est envoyé automatiquement chaque matin à 8h
+                à l'adresse <strong>{{ company_info.email or 'non configuré' }}</strong>.
+            </p>
+            <form action="/admin/toggle-relances-auto" method="POST" style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:none; font-size:0.95rem; color:var(--text);">
+                    <input type="checkbox" name="relances_auto_enabled" value="1" {% if relances_auto_enabled %}checked{% endif %}
+                           onchange="this.form.submit()" style="width:18px; height:18px; accent-color:var(--primary);">
+                    <span>Relances automatiques activées (8h chaque jour)</span>
+                </label>
+            </form>
+        </div>
+
+        <!-- Notifications relances -->
+        <div class="card">
+            <h2>Notifications relances</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">
+                Envoie un email récapitulatif des prospects à relancer aujourd'hui à l'adresse email de l'entreprise
+                (<strong>{{ company_info.email or 'non configuré' }}</strong>).
+            </p>
+            <form action="/admin/envoyer-relances" method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn" {% if not mailing_enabled %}disabled title="Mailing désactivé"{% endif %}>
+                    Envoyer le résumé des relances du jour
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Configuration SMTP</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 16px;">Paramètres du serveur d'envoi d'emails.</p>
+            <form action="/admin/smtp" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-row">
+                    <div><label>Hôte SMTP</label><input type="text" name="smtp_host" value="{{ smtp_config.smtp_host }}" placeholder="smtp.gmail.com" style="width:100%;"></div>
+                    <div><label>Port</label><input type="number" name="smtp_port" value="{{ smtp_config.smtp_port }}" placeholder="587" style="width:100%;"></div>
+                    <div><label>Utilisateur (login)</label><input type="text" name="smtp_user" value="{{ smtp_config.smtp_user }}" placeholder="mon@email.com" style="width:100%;" autocomplete="off"></div>
+                    <div><label>Mot de passe</label><input type="password" name="smtp_pass" placeholder="{{ '••••••••' if smtp_config.smtp_pass else 'Mot de passe SMTP' }}" style="width:100%;" autocomplete="new-password"></div>
+                    <div><label>Email expéditeur</label><input type="email" name="smtp_from" value="{{ smtp_config.smtp_from }}" placeholder="noreply@monentreprise.com" style="width:100%;"></div>
+                    <div><label>Nom expéditeur</label><input type="text" name="smtp_from_name" value="{{ smtp_config.smtp_from_name }}" placeholder="Mon Entreprise" style="width:100%;"></div>
+                </div>
+                <div class="form-group" style="max-width:300px;">
+                    <label>Sécurité</label>
+                    <select name="smtp_secure" style="width:100%;">
+                        <option value="tls" {% if smtp_config.smtp_secure == 'tls' %}selected{% endif %}>STARTTLS (port 587)</option>
+                        <option value="ssl" {% if smtp_config.smtp_secure == 'ssl' %}selected{% endif %}>SSL/TLS (port 465)</option>
+                        <option value="none" {% if smtp_config.smtp_secure == 'none' %}selected{% endif %}>Aucune (port 25)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Enregistrer</button>
+            </form>
+            <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                <button class="btn btn-outline" onclick="checkSmtp()">Tester la connexion</button>
+                <div style="flex:1; min-width:180px;"><label>Email de test</label><input type="email" id="testEmailAddr" placeholder="destinataire@test.com" style="width:100%;"></div>
+                <button class="btn" onclick="sendTestEmail()">Envoyer un test</button>
+            </div>
+            <div id="smtpCheckResult" style="margin-top:10px; font-size:0.88rem; display:none;"></div>
+            <div id="smtpTestResult" style="margin-top:10px; font-size:0.88rem; display:none;"></div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h2 style="margin:0;">Modèles d'email</h2>
+                <button class="btn btn-sm" onclick="openAddTpl()">+ Nouveau modèle</button>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin:0 0 14px;">
+                Variables disponibles : <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.8rem;">{{etablissement}}</code> <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.8rem;">{{contact}}</code> <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.8rem;">{{ville}}</code> <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.8rem;">{{categorie}}</code> <code style="background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.8rem;">{{company}}</code>
+            </p>
+            {% for tpl in mail_templates %}
+            <div class="tpl-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div style="flex:1; min-width:0;">
+                        <h4>{{ tpl.nom }}</h4>
+                        <p class="tpl-sujet">Objet : {{ tpl.sujet }}</p>
+                        <div style="font-size:0.82rem; color:var(--text-muted); white-space:pre-wrap; max-height:60px; overflow:hidden; text-overflow:ellipsis;">{{ tpl.corps[:200] }}{% if tpl.corps|length > 200 %}…{% endif %}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-shrink:0;">
+                        <button class="btn btn-outline btn-sm" onclick="openEditTpl({{ tpl.id }}, {{ tpl.nom|tojson }}, {{ tpl.sujet|tojson }}, {{ tpl.corps|tojson }})">Modifier</button>
+                        <form action="/admin/template/supprimer/{{ tpl.id }}" method="POST" onsubmit="return confirm('Supprimer ce modèle ?');" style="margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p style="color:var(--text-muted); font-style:italic; font-size:0.9rem;">Aucun modèle. Cliquez sur "+ Nouveau modèle" pour en créer un.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ONGLET RGPD -->
+    <div class="tab-pane" id="tab-rgpd">
+
+        <!-- Registre des traitements -->
+        <div class="card">
+            <h2>Registre des traitements (Art. 30 RGPD)</h2>
+            <table>
+                <thead><tr><th>Traitement</th><th>Finalité</th><th>Base légale</th><th>Durée de conservation</th><th>Destinataires</th></tr></thead>
+                <tbody>
+                <tr>
+                    <td><strong>Gestion des prospects</strong></td>
+                    <td>Prospection commerciale, suivi clients</td>
+                    <td>Intérêt légitime / Contrat</td>
+                    <td>3 ans après dernier contact</td>
+                    <td>Équipe commerciale interne</td>
+                </tr>
+                <tr>
+                    <td><strong>Envoi d'emails commerciaux</strong></td>
+                    <td>Communication commerciale, relances</td>
+                    <td>Intérêt légitime (B2B) / Consentement</td>
+                    <td>Durée de la relation commerciale</td>
+                    <td>Équipe commerciale interne</td>
+                </tr>
+                <tr>
+                    <td><strong>Journaux d'activité</strong></td>
+                    <td>Sécurité, traçabilité des accès</td>
+                    <td>Obligation légale / Intérêt légitime</td>
+                    <td>12 mois</td>
+                    <td>Administrateur système</td>
+                </tr>
+                </tbody>
+            </table>
+            <p style="margin:12px 0 0; font-size:0.8rem; color:var(--text-muted);">Responsable du traitement : <strong>{{ company_name }}</strong> — Ce registre doit être tenu à jour et communiqué à la CNIL sur demande.</p>
+        </div>
+
+        <!-- Configuration durée de conservation -->
+        <div class="card">
+            <h2>Durée de conservation des données</h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">Seuil d'inactivité au-delà duquel un prospect apparaît dans les alertes de purge.</p>
+            <form action="/admin/rgpd-config" method="POST" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div>
+                    <label>Seuil d'inactivité (mois)</label>
+                    <input type="number" name="rgpd_inactivity_months" value="{{ seuil_mois }}" min="1" max="120" style="width:120px;">
+                </div>
+                <button type="submit" class="btn">Enregistrer</button>
+            </form>
+        </div>
+
+        <!-- Alertes prospects inactifs -->
+        <div class="card">
+            <h2>Prospects inactifs — à examiner <span style="background:rgba(220,38,38,0.12); color:var(--danger); border:1px solid rgba(220,38,38,0.3); padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:700; margin-left:6px;">{{ prospects_inactifs | length }}</span></h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin:0 0 14px;">
+                Ces prospects n'ont eu aucune activité depuis plus de <strong>{{ seuil_mois }} mois</strong>. Selon le RGPD, les données sans utilité doivent être supprimées ou anonymisées.
+            </p>
+            {% if prospects_inactifs %}
+            <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Établissement</th><th>Contact</th><th>Ajouté le</th><th>Dernière activité</th><th style="text-align:right;">Action</th></tr></thead>
+                <tbody>
+                {% for p in prospects_inactifs %}
+                <tr>
+                    <td><a href="/prospect/{{ p.id }}" style="color:var(--primary); font-weight:600; text-decoration:none;">{{ p.etablissement }}</a></td>
+                    <td style="color:var(--text-muted);">{{ p.contact or '—' }}</td>
+                    <td style="color:var(--text-muted); font-size:0.85rem;">{{ p.date_ajout[:10] if p.date_ajout else '—' }}</td>
+                    <td style="color:var(--danger); font-size:0.85rem;">{{ p.derniere_activite or 'Jamais' }}</td>
+                    <td style="text-align:right;">
+                        <form action="/prospect/{{ p.id }}/supprimer" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer {{ p.etablissement }} et toutes ses données ?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <p style="color:var(--success); font-size:0.9rem; margin:0;">Aucun prospect inactif détecté. Votre base est conforme.</p>
+            {% endif %}
+        </div>
+
+        <!-- Droits des personnes -->
+        <div class="card">
+            <h2>Droits des personnes concernées</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.88rem;">
+                <div style="background:var(--bg); padding:12px; border-radius:6px; border:1px solid var(--border);">
+                    <strong>Droit d'accès & export</strong>
+                    <p style="margin:4px 0 0; color:var(--text-muted);">Bouton "Export RGPD" sur chaque fiche prospect → télécharge toutes les données en JSON.</p>
+                </div>
+                <div style="background:var(--bg); padding:12px; border-radius:6px; border:1px solid var(--border);">
+                    <strong>Droit à l'effacement</strong>
+                    <p style="margin:4px 0 0; color:var(--text-muted);">Bouton "Supprimer" sur la fiche prospect → supprime le prospect + toutes ses données liées.</p>
+                </div>
+                <div style="background:var(--bg); padding:12px; border-radius:6px; border:1px solid var(--border);">
+                    <strong>Droit d'opposition (opt-out)</strong>
+                    <p style="margin:4px 0 0; color:var(--text-muted);">Case "Ne plus contacter" dans l'édition du prospect → bloque tous les emails.</p>
+                </div>
+                <div style="background:var(--bg); padding:12px; border-radius:6px; border:1px solid var(--border);">
+                    <strong>Droit de rectification</strong>
+                    <p style="margin:4px 0 0; color:var(--text-muted);">Bouton "Éditer" sur chaque fiche → modification de toutes les données.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONGLET DANGER -->
+    <div class="tab-pane" id="tab-danger">
+        <div class="card" style="border-color:rgba(220,38,38,0.35);">
+            <h2 style="color:var(--danger);">Zone de danger</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin:0 0 16px; line-height:1.6;">
+                La remise à zéro supprime <strong>définitivement</strong> tous les prospects, interventions, événements et journaux.<br>
+                Les comptes utilisateurs sont conservés. <strong>Cette action est irréversible.</strong>
+            </p>
+            <button class="btn btn-danger" onclick="document.getElementById('resetZoneModal').classList.add('open')">Remettre le logiciel à zéro</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal remise à zéro -->
+<div class="modal-overlay" id="resetZoneModal">
+    <div class="modal" style="max-width:460px;">
+        <h3 style="color:var(--danger);">Remise à zéro — Confirmation</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin:0 0 20px; line-height:1.6;">Tapez <strong style="color:var(--text);">RESET</strong> pour confirmer la suppression de toutes les données.</p>
+        <form action="/admin/reset" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group"><label>Confirmation</label><input type="text" name="confirmation" placeholder="Tapez RESET" autocomplete="off" required style="width:100%;"></div>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-danger" style="flex:1;">Remettre à zéro</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('resetZoneModal').classList.remove('open')">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal réinitialisation mot de passe -->
+<div class="modal-overlay" id="resetModal">
+    <div class="modal">
+        <h3>Réinitialiser le mot de passe</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin:0 0 16px;">Utilisateur : <strong id="resetUsername"></strong></p>
+        <form id="resetForm" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group"><label>Nouveau mot de passe</label><input type="password" name="nouveau_mdp" id="resetMdp" required minlength="6" placeholder="Min. 6 caractères" style="width:100%;"></div>
+            <div class="form-group"><label>Confirmer</label><input type="password" name="confirmation_mdp" id="resetConfirm" required style="width:100%;"></div>
+            <div class="modal-actions">
+                <button type="submit" class="btn" style="flex:1;">Enregistrer</button>
+                <button type="button" class="btn btn-outline" onclick="closeResetModal()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal ajout/modification modèle -->
+<div class="modal-overlay" id="addTplModal">
+    <div class="modal" style="max-width:600px;">
+        <h3 id="tplModalTitle">Nouveau modèle d'email</h3>
+        <form id="tplForm" action="/admin/template/ajouter" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group"><label>Nom du modèle</label><input type="text" name="nom" id="tplNom" placeholder="Ex: Présentation, Relance..." required style="width:100%;"></div>
+            <div class="form-group"><label>Objet de l'email</label><input type="text" name="sujet" id="tplSujet" placeholder="Ex: Notre offre pour {{etablissement}}" required style="width:100%;"></div>
+            <div style="margin-bottom:8px; font-size:0.8rem; color:var(--text-muted);">
+                <span style="font-weight:600; display:block; margin-bottom:4px;">Prospect :</span>
+                <span class="var-btn" onclick="insertTplVar('{{etablissement}}')">{{etablissement}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{contact}}')">{{contact}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{ville}}')">{{ville}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{categorie}}')">{{categorie}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{statut}}')">{{statut}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{telephone}}')">{{telephone}}</span>
+                <span style="font-weight:600; display:block; margin:6px 0 4px;">Entreprise :</span>
+                <span class="var-btn" onclick="insertTplVar('{{company}}')">{{company}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{company_adresse}}')">{{company_adresse}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{company_tel}}')">{{company_tel}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{company_email}}')">{{company_email}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{company_site}}')">{{company_site}}</span>
+                <span class="var-btn" onclick="insertTplVar('{{company_siret}}')">{{company_siret}}</span>
+            </div>
+            <div class="form-group"><label>Corps du message</label><textarea name="corps" id="tplCorps" rows="8" required style="width:100%; resize:vertical;" placeholder="Bonjour {{contact}},&#10;&#10;...&#10;&#10;Cordialement,&#10;L'équipe {{company}}"></textarea></div>
+            <div class="modal-actions">
+                <button type="submit" class="btn" style="flex:1;">Enregistrer</button>
+                <button type="button" class="btn btn-outline" onclick="closeAddTpl()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const INIT_TAB = '{{ tab }}' || 'users';
+function switchTab(name) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    history.replaceState(null, '', '/admin?tab=' + name);
+}
+switchTab(INIT_TAB);
+
+function openResetModal(id, username) {
+    document.getElementById('resetUsername').textContent = username;
+    document.getElementById('resetForm').action = '/admin/reset_mdp/' + id;
+    document.getElementById('resetMdp').value = '';
+    document.getElementById('resetConfirm').value = '';
+    document.getElementById('resetModal').classList.add('open');
+}
+function closeResetModal() { document.getElementById('resetModal').classList.remove('open'); }
+document.getElementById('resetModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeResetModal(); });
+document.getElementById('resetZoneModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+
+function openAddTpl() {
+    document.getElementById('tplModalTitle').textContent = "Nouveau modèle d'email";
+    document.getElementById('tplForm').action = '/admin/template/ajouter';
+    document.getElementById('tplNom').value = '';
+    document.getElementById('tplSujet').value = '';
+    document.getElementById('tplCorps').value = '';
+    document.getElementById('addTplModal').classList.add('open');
+}
+function openEditTpl(id, nom, sujet, corps) {
+    document.getElementById('tplModalTitle').textContent = 'Modifier le modèle';
+    document.getElementById('tplForm').action = '/admin/template/modifier/' + id;
+    document.getElementById('tplNom').value = nom;
+    document.getElementById('tplSujet').value = sujet;
+    document.getElementById('tplCorps').value = corps;
+    document.getElementById('addTplModal').classList.add('open');
+}
+function closeAddTpl() { document.getElementById('addTplModal').classList.remove('open'); }
+document.getElementById('addTplModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddTpl(); });
+
+function insertTplVar(v) {
+    const el = document.getElementById('tplCorps');
+    const pos = el.selectionStart;
+    el.value = el.value.slice(0, pos) + v + el.value.slice(el.selectionEnd);
+    el.selectionStart = el.selectionEnd = pos + v.length;
+    el.focus();
+}
+
+document.getElementById('colorPrimaryPicker')?.addEventListener('input', function() { document.getElementById('colorPrimaryTxt').value = this.value; });
+document.getElementById('colorAccentPicker')?.addEventListener('input', function() { document.getElementById('colorAccentTxt').value = this.value; });
+document.getElementById('colorPrimaryTxt')?.addEventListener('input', function() { if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('colorPrimaryPicker').value = this.value; });
+document.getElementById('colorAccentTxt')?.addEventListener('input', function() { if(/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('colorAccentPicker').value = this.value; });
+
+function checkSmtp() {
+    const result = document.getElementById('smtpCheckResult');
+    result.style.display='block'; result.innerHTML='<span style="color:var(--text-muted)">Test en cours…</span>';
+    fetch('/admin/smtp-check', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({csrf_token:'{{ csrf_token }}'}) })
+    .then(r=>r.json()).then(data => {
+        result.innerHTML = data.steps.map(s => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span>${s.status==='ok'?'✅':'❌'}</span><span style="color:${s.status==='ok'?'var(--success)':'var(--danger)'}">${s.msg}</span></div>`).join('');
+    }).catch(() => { result.innerHTML='<span style="color:var(--danger)">Erreur réseau.</span>'; });
+}
+function sendTestEmail() {
+    const to = document.getElementById('testEmailAddr').value.trim();
+    const result = document.getElementById('smtpTestResult');
+    if (!to) { result.style.display='block'; result.style.color='var(--danger)'; result.textContent='Saisissez une adresse.'; return; }
+    result.style.display='block'; result.style.color='var(--text-muted)'; result.textContent='Envoi…';
+    fetch('/admin/smtp-test', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({to_email: to, csrf_token:'{{ csrf_token }}'}) })
+    .then(r=>r.json()).then(data => { result.style.color=data.ok?'var(--success)':'var(--danger)'; result.textContent=data.message; })
+    .catch(() => { result.style.color='var(--danger)'; result.textContent='Erreur réseau.'; });
+}
+</script>
+</body></html>
