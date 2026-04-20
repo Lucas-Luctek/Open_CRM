@@ -6,46 +6,121 @@
 
 set -e
 
-echo "=== Installation du CRM ==="
+echo ""
+echo "╔══════════════════════════════════════╗"
+echo "║      Installation du CRM Open Source  ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
 
-# 1. Vérifier Python 3
+# ── 1. Choix du mot de passe admin ──────────────────────────
+echo "─── Compte administrateur ───"
+while true; do
+    read -s -p "Choisissez le mot de passe admin (min. 6 caractères) : " ADMIN_PASS
+    echo ""
+    if [ ${#ADMIN_PASS} -lt 6 ]; then
+        echo "  Mot de passe trop court, réessayez."
+        continue
+    fi
+    read -s -p "Confirmez le mot de passe : " ADMIN_PASS2
+    echo ""
+    if [ "$ADMIN_PASS" != "$ADMIN_PASS2" ]; then
+        echo "  Les mots de passe ne correspondent pas, réessayez."
+    else
+        break
+    fi
+done
+echo "  ✓ Mot de passe enregistré."
+echo ""
+
+# ── 2. Choix du port ────────────────────────────────────────
+echo "─── Port de l'application ───"
+read -p "Port d'écoute [5000 par défaut, appuyez sur Entrée pour garder 5000] : " APP_PORT
+APP_PORT=${APP_PORT:-5000}
+echo "  ✓ Port : $APP_PORT"
+echo ""
+
+# ── 3. Vérifier Python 3 ────────────────────────────────────
+echo "─── Vérification de Python 3 ───"
 if ! command -v python3 &>/dev/null; then
-    echo "Python3 non trouvé. Installation..."
+    echo "  Python3 non trouvé. Installation..."
     sudo apt-get update && sudo apt-get install -y python3 python3-pip python3-venv
 fi
+echo "  ✓ $(python3 --version)"
+echo ""
 
-echo "Python: $(python3 --version)"
-
-# 2. Créer l'environnement virtuel
+# ── 4. Créer l'environnement virtuel ────────────────────────
+echo "─── Environnement virtuel ───"
 if [ ! -d "venv" ]; then
-    echo "Création de l'environnement virtuel..."
+    echo "  Création de l'environnement virtuel..."
     python3 -m venv venv
 fi
-
-# 3. Activer et installer les dépendances
-echo "Installation des dépendances..."
 source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+echo "  ✓ Environnement virtuel prêt."
+echo ""
 
-# 4. Créer le fichier .env si absent
+# ── 5. Installer les dépendances ────────────────────────────
+echo "─── Installation des dépendances ───"
+pip install --upgrade pip -q
+pip install -r requirements.txt -q
+echo "  ✓ Dépendances installées."
+echo ""
+
+# ── 6. Créer le fichier .env ────────────────────────────────
+echo "─── Configuration ───"
 if [ ! -f ".env" ]; then
-    echo "Création du fichier .env depuis .env.example..."
     cp .env.example .env
-    # Générer une clé secrète aléatoire
-    SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-    sed -i "s/changez-cette-cle-en-production-svp/$SECRET/" .env
-    echo "Clé secrète générée automatiquement dans .env"
 fi
+SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+sed -i "s/changez-cette-cle-en-production-svp/$SECRET/" .env
+# Mettre à jour le port dans .env
+if grep -q "^PORT=" .env; then
+    sed -i "s/^PORT=.*/PORT=$APP_PORT/" .env
+else
+    echo "PORT=$APP_PORT" >> .env
+fi
+echo "  ✓ Fichier .env configuré (clé secrète + port $APP_PORT)."
+echo ""
+
+# ── 7. Initialiser la base et définir le mot de passe ───────
+echo "─── Initialisation de la base de données ───"
+python3 - <<PYEOF
+import sys, os
+sys.path.insert(0, '.')
+# Charger les variables .env manuellement
+if os.path.exists('.env'):
+    for line in open('.env'):
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            k, v = line.split('=', 1)
+            os.environ.setdefault(k.strip(), v.strip())
+
+from app import init_db
+import sqlite3
+from werkzeug.security import generate_password_hash
+
+init_db()
+
+conn = sqlite3.connect('crm.db')
+c = conn.cursor()
+hashed = generate_password_hash('${ADMIN_PASS}')
+c.execute("UPDATE users SET password = ? WHERE username = 'admin'", (hashed,))
+conn.commit()
+conn.close()
+print("  ✓ Base de données initialisée.")
+print("  ✓ Mot de passe admin configuré.")
+PYEOF
 
 echo ""
-echo "=== Installation terminée ==="
-echo ""
-echo "Pour lancer l'application:"
-echo "  source venv/bin/activate"
-echo "  python app.py"
-echo ""
-echo "Accès: http://localhost:5000"
-echo "Identifiants par défaut: admin / admin123"
-echo "IMPORTANT: Changer le mot de passe admin apres la premiere connexion!"
+echo "╔══════════════════════════════════════════════════╗"
+echo "║              Installation terminée !             ║"
+echo "╠══════════════════════════════════════════════════╣"
+echo "║                                                  ║"
+echo "║  Pour lancer le CRM :                            ║"
+echo "║    source venv/bin/activate                      ║"
+echo "║    python app.py                                 ║"
+echo "║                                                  ║"
+echo "║  Accès : http://localhost:$APP_PORT               ║"
+echo "║  Login : admin  /  (mot de passe choisi)         ║"
+echo "║                                                  ║"
+echo "╚══════════════════════════════════════════════════╝"
 echo ""
