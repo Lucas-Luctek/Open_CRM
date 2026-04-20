@@ -8,6 +8,12 @@
 
 CRM léger pour la prospection commerciale. Développé en Python/Flask avec SQLite, sans dépendances lourdes.
 
+---
+
+![Tableau de bord](docs/screenshots/tableau-de-bord.png)
+![Base de données](docs/screenshots/base-donnees.png)
+![Agenda](docs/screenshots/agenda.png)
+
 ## Fonctionnalités
 
 - Tableau de bord avec KPIs, pipeline de conversion et graphiques
