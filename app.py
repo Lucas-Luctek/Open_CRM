@@ -26,8 +26,9 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'changez-cette-cle-en-production-svp')
-DB_NAME = 'crm.db'
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+_DATA_DIR = os.environ.get('DATA_DIR', '')
+DB_NAME = os.path.join(_DATA_DIR, 'crm.db') if _DATA_DIR else 'crm.db'
+UPLOAD_FOLDER = os.path.join(_DATA_DIR, 'uploads') if _DATA_DIR else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)

@@ -50,6 +50,64 @@ Login : `admin` / *(mot de passe choisi à l'installation)*
 
 ---
 
+## Installation avec Docker
+
+### Démarrage rapide
+
+```bash
+git clone https://github.com/Lucas-Luctek/Open_CRM.git crm
+cd crm
+ADMIN_PASSWORD=monmotdepasse docker compose up -d
+```
+
+L'application est accessible sur **http://localhost:5000**  
+Login : `admin` / *(le mot de passe défini ci-dessus)*
+
+### Changer le port hôte
+
+```bash
+HOST_PORT=8080 ADMIN_PASSWORD=monmotdepasse docker compose up -d
+```
+
+### Avec un fichier `.env`
+
+```bash
+cp .env.example .env
+# Éditer .env :
+nano .env
+```
+
+Ajouter dans `.env` :
+```
+ADMIN_PASSWORD=monmotdepasse
+HOST_PORT=5000
+SECRET_KEY=une-cle-secrete-aleatoire
+COMPANY_NAME=MON ENTREPRISE
+```
+
+Puis :
+```bash
+docker compose up -d
+```
+
+### Commandes utiles
+
+```bash
+# Voir les logs
+docker compose logs -f
+
+# Arrêter
+docker compose down
+
+# Mettre à jour (nouvelle version)
+git pull
+docker compose up -d --build
+```
+
+Les données (base de données, fichiers uploadés, sauvegardes) sont conservées dans un volume Docker nommé `crm_data` — elles persistent entre les redémarrages et les mises à jour.
+
+---
+
 ## Lancer en service systemd (démarrage automatique)
 
 Pour que le CRM démarre automatiquement avec le serveur, créez `/etc/systemd/system/crm.service` :

@@ -11,7 +11,8 @@ import shutil
 import os
 from datetime import datetime
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_DATA_DIR = os.environ.get('DATA_DIR', '')
+BASE_DIR = _DATA_DIR if _DATA_DIR else os.path.dirname(os.path.abspath(__file__))
 DB_SRC = os.path.join(BASE_DIR, 'crm.db')
 BACKUP_DIR = os.path.join(BASE_DIR, 'backups')
 MAX_BACKUPS = 30
