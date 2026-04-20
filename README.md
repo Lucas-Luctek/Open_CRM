@@ -130,4 +130,4 @@ Chart.js · Leaflet · FullCalendar · Google Charts · html2canvas · jsPDF · 
 
 ## Licence
 
-MIT — Libre d'utilisation, modification et distribution.
+[GPL v3](LICENSE) — Libre d'utilisation et de modification. Toute redistribution doit rester sous la même licence open source.
