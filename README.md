@@ -69,9 +69,8 @@ sudo apt-get update
 sudo apt-get install -y python3 python3-pip python3-venv git
 
 # Cloner ou copier le projet
-# (si depuis un dépôt git)
-# git clone <url_du_repo> crm
-# cd crm
+git clone https://github.com/Lucas-Luctek/Open_CRM.git crm
+cd crm
 
 # Lancer le script d'install
 chmod +x setup.sh && ./setup.sh
@@ -114,10 +113,10 @@ After=network.target
 
 [Service]
 User=votre_user
-WorkingDirectory=/chemin/vers/crm_opensource
+WorkingDirectory=/chemin/vers/crm
 Environment=SECRET_KEY=votre_cle_secrete_ici
 Environment=COMPANY_NAME=MON ENTREPRISE
-ExecStart=/chemin/vers/crm_opensource/venv/bin/python app.py
+ExecStart=/chemin/vers/crm/venv/bin/python app.py
 Restart=always
 
 [Install]
@@ -158,14 +157,12 @@ Peut être changé à tout moment via le panneau **Admin > Personnalisation** sa
 ## Structure du projet
 
 ```
-crm_opensource/
+crm/
 ├── app.py              # Application Flask principale
 ├── backup.py           # Script de sauvegarde
 ├── requirements.txt    # Dépendances Python
 ├── setup.sh            # Script d'installation automatique
 ├── .env.example        # Modèle de configuration
-├── crm.db              # Base SQLite (créée au premier lancement)
-├── backups/            # Sauvegardes (créé par backup.py)
 ├── static/
 │   ├── favicon.svg
 │   └── style.css
@@ -196,31 +193,9 @@ crm_opensource/
 ```bash
 # Sauvegarde manuelle
 python backup.py
-
-# Sauvegarde automatique quotidienne (cron)
-# Éditer avec: crontab -e
-0 2 * * * cd /chemin/vers/crm_opensource && venv/bin/python backup.py >> backups/backup.log 2>&1
 ```
 
-Les sauvegardes sont stockées dans `backups/` (30 dernières conservées).
-
----
-
-## Travailler avec Claude Code (version bureau)
-
-1. Ouvrir le dossier `crm_opensource/` dans Claude Code
-2. Le fichier `app.py` contient toute la logique backend
-3. Les templates HTML sont dans `templates/`
-4. Les styles dans `static/style.css`
-
-Commandes utiles en développement :
-```bash
-# Lancer avec rechargement automatique
-FLASK_DEBUG=true python app.py
-
-# Réinitialiser la base (supprime crm.db)
-rm crm.db && python app.py
-```
+Les sauvegardes sont stockées dans `backups/` (30 dernières conservées). Une sauvegarde automatique tourne chaque nuit à 2h via APScheduler.
 
 ---
 
