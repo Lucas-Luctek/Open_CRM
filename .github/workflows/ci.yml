@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer les dépendances système (WeasyPrint)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
+            libgdk-pixbuf2.0-0 libcairo2 libffi8 fontconfig fonts-liberation
+
+      - name: Configurer Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Installer les dépendances Python
+        run: pip install -r requirements.txt
+
+      - name: Vérifier le démarrage de l'application
+        env:
+          SECRET_KEY: cle-de-test-ci-uniquement
+        run: |
+          python - <<'EOF'
+          import os
+          os.environ['SECRET_KEY'] = 'cle-de-test-ci-uniquement'
+          from app import init_db
+          init_db()
+          print("✓ Application initialisée avec succès")
+          EOF

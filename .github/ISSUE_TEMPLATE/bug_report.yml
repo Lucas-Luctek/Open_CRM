@@ -1,0 +1,60 @@
+name: Bug report
+description: Signaler un problème
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de remplir ce formulaire pour nous aider à reproduire et corriger le bug.
+        Vous pouvez aussi nous contacter sur [Discord](https://discord.gg/8w7MeXby4T) ou par email à contact@luctek.fr
+
+  - type: input
+    id: version
+    attributes:
+      label: Version du CRM
+      description: Numéro de version ou commit (visible en bas de l'interface admin)
+      placeholder: "ex: v1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Système d'exploitation
+      placeholder: "ex: Debian 12, Ubuntu 22.04, Windows 11"
+    validations:
+      required: true
+
+  - type: input
+    id: install
+    attributes:
+      label: Mode d'installation
+      placeholder: "Script setup.sh / Docker / Manuel"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      description: Qu'est-ce qui se passe ? Qu'est-ce qui devrait se passer ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Aller sur la page '...'
+        2. Cliquer sur '...'
+        3. Observer l'erreur
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optionnel)
+      description: "`journalctl -u crm -n 50` ou logs Docker"
+      render: shell

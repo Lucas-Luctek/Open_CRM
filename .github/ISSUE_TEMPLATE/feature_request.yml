@@ -1,0 +1,36 @@
+name: Feature request
+description: Proposer une nouvelle fonctionnalité
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vous pouvez aussi discuter de vos idées sur [Discord](https://discord.gg/8w7MeXby4T) ou par email à contact@luctek.fr
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Quel problème cette fonctionnalité résoudrait-elle ?
+      placeholder: "ex: Il n'est pas possible de faire X, ce qui m'oblige à..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solution proposée
+      description: Décrivez ce que vous aimeriez voir
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Avez-vous trouvé d'autres façons de contourner le problème ?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexte supplémentaire
+      description: Captures d'écran, exemples, cas d'usage concrets...

@@ -1,5 +1,11 @@
 # CRM Commercial Open Source
 
+![Licence](https://img.shields.io/badge/licence-GPL%20v3-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Flask](https://img.shields.io/badge/flask-2.3%2B-green)
+![CI](https://github.com/Lucas-Luctek/Open_CRM/actions/workflows/ci.yml/badge.svg)
+[![Discord](https://img.shields.io/badge/Discord-Rejoindre-7289da)](https://discord.gg/8w7MeXby4T)
+
 CRM léger pour la prospection commerciale. Développé en Python/Flask avec SQLite, sans dépendances lourdes.
 
 ## Fonctionnalités

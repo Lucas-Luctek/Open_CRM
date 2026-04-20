@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord — Support & discussions
+    url: https://discord.gg/8w7MeXby4T
+    about: Rejoignez le serveur Discord pour poser vos questions et discuter du projet
+  - name: Email
+    url: mailto:contact@luctek.fr
+    about: Contactez-nous directement par email
