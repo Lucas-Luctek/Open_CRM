@@ -39,7 +39,7 @@ APP_PORT=${APP_PORT:-5000}
 echo "  ✓ Port : $APP_PORT"
 echo ""
 
-# ── 3. Vérifier Python 3 ────────────────────────────────────
+# ── 3. Vérifier Python 3 + dépendances système ──────────────
 echo "─── Vérification de Python 3 ───"
 if ! command -v python3 &>/dev/null; then
     echo "  Python3 non trouvé. Installation..."
@@ -49,6 +49,14 @@ fi
 PYTHON_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 apt-get install -y "python${PYTHON_VER}-venv" -qq
 echo "  ✓ $(python3 --version)"
+echo ""
+
+echo "─── Bibliothèques système (WeasyPrint) ───"
+apt-get install -y -qq \
+    libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
+    libcairo2 libgdk-pixbuf2.0-0 libffi-dev \
+    shared-mime-info fonts-liberation
+echo "  ✓ Bibliothèques installées."
 echo ""
 
 # ── 4. Créer l'environnement virtuel ────────────────────────
