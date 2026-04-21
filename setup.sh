@@ -43,15 +43,22 @@ echo ""
 echo "─── Vérification de Python 3 ───"
 if ! command -v python3 &>/dev/null; then
     echo "  Python3 non trouvé. Installation..."
-    sudo apt-get update && sudo apt-get install -y python3 python3-pip python3-venv
+    apt-get update -qq && apt-get install -y python3 python3-venv
+fi
+# S'assurer que python3-venv est disponible (requis sur Debian/Ubuntu)
+PYTHON_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+if ! python3 -m venv --help &>/dev/null 2>&1; then
+    echo "  Installation de python${PYTHON_VER}-venv..."
+    apt-get install -y "python${PYTHON_VER}-venv"
 fi
 echo "  ✓ $(python3 --version)"
 echo ""
 
 # ── 4. Créer l'environnement virtuel ────────────────────────
 echo "─── Environnement virtuel ───"
-if [ ! -d "venv" ]; then
+if [ ! -f "venv/bin/activate" ]; then
     echo "  Création de l'environnement virtuel..."
+    rm -rf venv
     python3 -m venv venv
 fi
 source venv/bin/activate

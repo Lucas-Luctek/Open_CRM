@@ -33,22 +33,25 @@ CRM léger pour la prospection commerciale. Développé en Python/Flask avec SQL
 
 ## Installation
 
-### 1 — Cloner le dépôt
+### Installation en une commande (recommandé)
+
+Sur une Debian/Ubuntu fraîche, **même sans git** :
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Lucas-Luctek/Open_CRM/main/install.sh)
+```
+
+Le script installe automatiquement `git`, clone le dépôt, configure l'application et vous pose deux questions :
+- **Mot de passe admin** — celui que vous utiliserez pour vous connecter
+- **Port** — port d'écoute de l'application (5000 par défaut)
+
+### Installation manuelle (si git est déjà installé)
 
 ```bash
 git clone https://github.com/Lucas-Luctek/Open_CRM.git crm
 cd crm
-```
-
-### 2 — Lancer le script d'installation
-
-```bash
 chmod +x setup.sh && ./setup.sh
 ```
-
-Le script installe tout automatiquement et vous pose deux questions :
-- **Mot de passe admin** — celui que vous utiliserez pour vous connecter
-- **Port** — port d'écoute de l'application (5000 par défaut)
 
 ### 3 — Démarrer le CRM
 
