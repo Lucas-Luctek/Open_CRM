@@ -124,16 +124,44 @@ print("  ✓ Base de données initialisée.")
 print("  ✓ Mot de passe admin configuré.")
 PYEOF
 
+# ── 8. Configurer le service systemd ────────────────────────
+echo "─── Service systemd ───"
+INSTALL_DIR="$(pwd)"
+cat > /etc/systemd/system/crm.service <<EOF
+[Unit]
+Description=CRM Open Source
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=${INSTALL_DIR}
+EnvironmentFile=${INSTALL_DIR}/.env
+ExecStart=${INSTALL_DIR}/venv/bin/python3 ${INSTALL_DIR}/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable crm --quiet
+systemctl restart crm
+echo "  ✓ Service CRM démarré et activé au démarrage."
 echo ""
+
 echo "╔══════════════════════════════════════════════════╗"
 echo "║              Installation terminée !             ║"
 echo "╠══════════════════════════════════════════════════╣"
 echo "║                                                  ║"
-echo "║  Pour lancer le CRM :                            ║"
-echo "║    source venv/bin/activate                      ║"
-echo "║    python app.py                                 ║"
+echo "║  Le CRM est démarré automatiquement.             ║"
 echo "║                                                  ║"
-echo "║  Accès : http://localhost:$APP_PORT               ║"
+echo "║  Commandes utiles :                              ║"
+echo "║    systemctl status crm                          ║"
+echo "║    systemctl restart crm                         ║"
+echo "║    journalctl -u crm -f                          ║"
+echo "║                                                  ║"
+echo "║  Accès : http://$(hostname -I | awk '{print $1}'):$APP_PORT"
 echo "║  Login : admin  /  (mot de passe choisi)         ║"
 echo "║                                                  ║"
 echo "╚══════════════════════════════════════════════════╝"
