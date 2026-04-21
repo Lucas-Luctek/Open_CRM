@@ -54,8 +54,10 @@ echo ""
 echo "─── Bibliothèques système (WeasyPrint) ───"
 apt-get install -y -qq \
     libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
-    libcairo2 libgdk-pixbuf2.0-0 libffi-dev \
-    shared-mime-info fonts-liberation
+    libcairo2 libffi-dev shared-mime-info fonts-liberation
+# libgdk-pixbuf : nom différent selon la version Debian
+apt-get install -y -qq libgdk-pixbuf-2.0-0 2>/dev/null || \
+apt-get install -y -qq libgdk-pixbuf2.0-0 2>/dev/null || true
 echo "  ✓ Bibliothèques installées."
 echo ""
 
